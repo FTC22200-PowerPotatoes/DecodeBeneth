@@ -27,7 +27,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import java.util.List;
 import java.util.Locale;
 
-
 @TeleOp
 public class LimelightDecodeDriveMode extends LinearOpMode {
     double launcher_velocity = 3000.0;
@@ -38,7 +37,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
     boolean alliance = true;
     boolean boxServoUp = false;
 
-
     private AnalogInput laserAnalog;
     private static final double MAX_VOLTS = 3.3;
     private static final double MAX_DISTANCE_MM = 4000.0;
@@ -48,19 +46,16 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
     CRServo leftFeeder;
     CRServo rightFeeder;
     CRServo topWheel;
-    Servo rgbLight; // For c olor
-
+    Servo rgbLight; // For color
 
     // HERE //
     private Limelight3A limelight;
     private IMU imu;
 
-
     @Override
     public void runOpMode() {
         ColorSensor colorSensor;
         // Motor config`
-
 
         laserAnalog = hardwareMap.get(AnalogInput.class, "laserAnalogInput");
         DcMotorEx frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
@@ -76,7 +71,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         colorSensor = hardwareMap.get(ColorSensor.class, "Color Sensor");
         rgbLight = hardwareMap.get(Servo.class, "RGB Light");
 
-
         // Motor directions
         frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
         backLeft.setDirection(DcMotorEx.Direction.FORWARD);
@@ -89,11 +83,9 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         launcher.setDirection(DcMotorEx.Direction.FORWARD);
 
-
         // Limelight initalization HERE!
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(8);
-
 
         // IMU HERE!
         imu = hardwareMap.get(IMU.class, "imu");
@@ -103,18 +95,14 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         );
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
-
         // Odometry setup
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
-
 
         // Type of odometry arm that the robot is using.
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
 
-
         //Direction
         odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
-
 
        /*
        Before running the robot, recalibrate the IMU. This needs to happen when the robot is stationary
@@ -144,45 +132,35 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         telemetry.addData("Heading Scalar", odo.getYawScalar());
         telemetry.update();
 
-
         final int CYCLE_MS = 5;
-
 
         waitForStart();
         if (isStopRequested()) return;
 
-
         // HERE //
         limelight.start();
-
 
         while (opModeIsActive()) {
             // HERE //
             YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
             limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
 
-
             double volts = laserAnalog.getVoltage();
-
 
             // Convert voltage to distance in millimeters (linear mapping)
             double distanceInch = ((volts / MAX_VOLTS) * MAX_DISTANCE_MM) * 25.4;
 
-
             odo.update();
-
 
             // Telemetry
             telemetry.addData("Voltage (V)", "%.3f", volts);
             telemetry.addData("Distance (mm)", "%.1f", distanceInch);
-
 
             if (gamepad1.x || gamepad1.square) {
                 alliance = false;
             } else if (gamepad1.b || gamepad1.circle) {
                 alliance = true;
             }
-
 
             int red = colorSensor.red();
             int blue = colorSensor.blue();
@@ -193,12 +171,10 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             telemetry.addData("Red", red);
             telemetry.addData("Blue", blue);
 
-
             double newTime = getRuntime();
             double loopTime = newTime - oldTime;
             double frequency = 1 / loopTime;
             oldTime = newTime;
-
 
            /*
            gets the current Position (x & y in mm, and heading in degrees) of the robot, and prints it.
@@ -207,16 +183,14 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.getX(DistanceUnit.MM), pos.getY(DistanceUnit.MM), pos.getHeading(AngleUnit.DEGREES));
             telemetry.addData("Position", data);
 
-
            /*
            gets the current Velocity (x & y in mm/sec and heading in degrees/sec) and prints it.
             */
             String velocity = String.format(Locale.US, "{XVel: %.3f, YVel: %.3f, HVel: %.3f}", odo.getVelX(DistanceUnit.MM), odo.getVelY(DistanceUnit.MM), odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES));
             telemetry.addData("Velocity", velocity);
 
-
             if (gamepad2.dpad_up) { // high
-                launcher_velocity = 2225.0; // AIDEN sucks bad >:((
+                launcher_velocity = 2225.0;
             } else if (gamepad2.dpad_left) { // medium
                 launcher_velocity = 2100.0;
             } else if (gamepad2.dpad_right) { // low-mid (new)
@@ -224,7 +198,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             } else if (gamepad2.dpad_down) { // low
                 launcher_velocity = 1500.0;
             }
-
 
             if (gamepad2.right_trigger > 0) {
                 launcher.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
@@ -251,32 +224,25 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
             }
 
-
             // Drive calculations
             double y = -gamepad1.left_stick_y * speedMultiplier;
             double x = gamepad1.left_stick_x * 1.1 * speedMultiplier;
             double rx = -gamepad1.right_stick_x * speedMultiplier;
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
-
             // To decrease 'noise' via small movements
             if (Math.abs(x) < 0.05) x = 0;
             if (Math.abs(y) < 0.05) y = 0;
             if (Math.abs(rx) < 0.05) rx = 0;
-
 
             double fL_Motor = (y + x + rx) / denominator;
             double bL_Motor = (y - x + rx) / denominator;
             double fR_Motor = (y - x - rx) / denominator;
             double bR_Motor = (y + x - rx) / denominator;
 
-
-
-
             // Limelight alignment HERE //
             LLResult llResult = limelight.getLatestResult();
             boolean isValid = llResult != null && llResult.isValid();
-
 
             if (isValid) {
                 telemetry.addLine("AprilTag Detected");
@@ -324,13 +290,9 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             telemetry.addData("Verticle Offset:  (in)", ty);
             telemetry.addData("Area of tag: ", distanceInches);
 
-
-
             // Press a to turn on auto-aim (limelight)
             if (gamepad1.right_trigger > 0.0 && isValid) {
-
                 // 'amt' of turn
-
                 double offsetCAngle = Math.toDegrees(Math.atan(0.126975 / distanceMeters));
 
                 double kP = 0.02;
@@ -338,15 +300,11 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 turnPower = Math.max(-0.3, Math.min(0.3, turnPower));
                 if (Math.abs(tx) < 1.0) turnPower = 0;
 
-
                 // Rotate robot via above
                 fL_Motor += -turnPower;
                 bL_Motor += -turnPower;
                 fR_Motor += turnPower;
                 bR_Motor += turnPower;
-
-
-
 
                 // Telemetry for data
                 telemetry.addData("Left/Right offset: ", tx);
@@ -358,19 +316,13 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             frontRight.setPower(fR_Motor);
             backRight.setPower(bR_Motor);
 
-
             if (gamepad2.b || gamepad2.circle) {
                 if (distanceToGoalMm(true) / 25.4 < 80.0) {
                     launcher_velocity = Math.ceil(25.333 * distanceToGoalMm(alliance)/25.4);
                 } else {
                     launcher_velocity = Math.ceil(22.555 * distanceToGoalMm(alliance)/25.4);
                 }
-
-
-
-
             }
-
 
             // Intake motor's control
             if (gamepad2.right_stick_y != 0.0) {
@@ -378,7 +330,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             } else {
                 intakeMotor.setPower(0.0);
             }
-
 
             if (gamepad2.right_bumper) {
                 leftFeeder.setPower(-1.0);
@@ -404,7 +355,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 boxServoUp = false;
             }
 
-
             // Detected color through sensor
             String detectedColor = "UNKNOWN";
             if (red > green && red > blue || green < 250 && purple < 250) {
@@ -415,9 +365,7 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 detectedColor = "PURPLE";
             }
 
-
             telemetry.addData("Detected Color:", detectedColor);
-
 
             // Displaying color
             if (detectedColor.equals("GREEN")) {
@@ -427,10 +375,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             } else {
                 rgbLight.setPosition(1.0);
             }
-
-
-
-
 
             //Incremental velocity power
             if (gamepad2.left_stick_y > 0.0) {
@@ -484,13 +428,13 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 double goalY = 69.15 * 25.4;
                 double dx = goalX - pos.getX(DistanceUnit.MM);
                 double dy = goalY - pos.getY(DistanceUnit.MM);
-                return Math.hypot(dx, dy); // mm
+                return Math.hypot(dx, dy); // mm distance
             } else {
                 double goalX = -73.25 * 25.4;
                 double goalY = -69.15 * 25.4;
                 double dx = goalX - pos.getX(DistanceUnit.MM);
                 double dy = goalY - pos.getY(DistanceUnit.MM);
-                return Math.hypot(dx, dy); // mm
+                return Math.hypot(dx, dy); // distance
             }
         } else {
             return 0;
