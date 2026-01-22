@@ -317,12 +317,15 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             backRight.setPower(bR_Motor);
 
             if (gamepad2.b || gamepad2.circle) {
-                if (distanceToGoalMm(true) / 25.4 < 80.0) {
-                    launcher_velocity = Math.ceil(25.333 * distanceToGoalMm(alliance)/25.4);
+                /* if (distanceToGoalMm(true) / 25.4 < 80.0) {
+                    launcher_velocity = Math.ceil(25.333 * distanceToGoalMm(alliance) / 25.4);
                 } else {
-                    launcher_velocity = Math.ceil(22.555 * distanceToGoalMm(alliance)/25.4);
-                }
+                    launcher_velocity = Math.ceil(22.555 * distanceToGoalMm(alliance) / 25.4);
+                } */
+            } else {
+                launcher_velocity = rpmFromDistanceFormula(distanceToGoalMm(alliance));
             }
+
 
             // Intake motor's control
             if (gamepad2.right_stick_y != 0.0) {
@@ -376,7 +379,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 rgbLight.setPosition(1.0);
             }
 
-            //Incremental velocity power
             if (gamepad2.left_stick_y > 0.0) {
                 launcher_velocity += 20;
             } else if (gamepad2.left_stick_y < 0.0) {
@@ -407,20 +409,38 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             telemetry.update();
 
 
+            telemetry.addData("Launcher Target Velocity: ", launcher_velocity);
+            telemetry.addData("Actual launcher target velocity: ", launcher.getVelocity());
+            // telemetry.addData("RPM Calculated from Dist: ", calcRPM);
             telemetry.update();
-            telemetry.addData("Launcher target velocity : ", launcher_velocity);
-            telemetry.addData("Acc target velocity: ", launcher.getVelocity());
             sleep(CYCLE_MS);
             idle();
         }
     }
 
-
     public void launch() { // changed from private
-
-
         launcher.setVelocity(launcher_velocity);
     }
+
+    public double rpmFromDistanceFormula(double distanceMm) {
+        double rpmPerMm = 0.3; // based on formula (points)
+        double baseRPM = 1500.0; // Base RPM based off low
+
+        /* rpmPerMm can be changed using slope formula based on certain distance and correct, corresponding RPM
+        rpm2 - rpm1 / distance2 - distance1
+
+        baseRPM can change via rpm1 value - rpmPerMm * distance1
+        */
+        double rpm = (rpmPerMm * distanceMm) + baseRPM;
+        rpm = Math.max(1500.0, rpm);
+        rpm = Math.min(2100.0, rpm);
+
+        telemetry.addData("Shot Distance in mm: ", "%.1f", distanceMm);
+        telemetry.addData("RPM derived from pos: ", "%.0f", rpm);
+
+        return rpm;
+    };
+
     public double distanceToGoalMm(boolean isRed) {
         if (pos != null) {
             if (isRed) {
