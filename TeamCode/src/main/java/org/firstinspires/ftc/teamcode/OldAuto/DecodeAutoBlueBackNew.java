@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.OldAuto;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
@@ -25,11 +25,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
 import java.util.Locale;
 
-@Autonomous(name="DecodeAutoRedBackNew", group="Decode")
-public class DecodeAutoRedFrontNew extends OpMode {
+@Autonomous(name="BlueBackNew", group="Decode")
+public class DecodeAutoBlueBackNew extends OpMode {
 
     private DcMotorEx launcher;
     GoBildaPinpointDriver odo;
@@ -42,8 +43,8 @@ public class DecodeAutoRedFrontNew extends OpMode {
     private AnalogInput laserAnalog;
 
     // Launcher velocities
-    final double LAUNCHER_TARGET_VELOCITY = 2135.0;
-    final double LAUNCHER_MIN_VELOCITY = 2085.0;
+    final double LAUNCHER_TARGET_VELOCITY = 2050.0;
+    final double LAUNCHER_MIN_VELOCITY = 2000.0;
 
     double shotsToFire = 3;
     double TIME_BETWEEN_SHOTS = 3.0;
@@ -171,7 +172,7 @@ public class DecodeAutoRedFrontNew extends OpMode {
 
         // Starting position on the field (example values)
         Pose2D startingPosition = new Pose2D(DistanceUnit.MM,
-                609.6,
+                -609.6,
                 -1524.0,
                 AngleUnit.DEGREES,
                 0
@@ -351,7 +352,7 @@ public class DecodeAutoRedFrontNew extends OpMode {
             double offsetCAngle = Math.toDegrees(Math.atan(0.126975 / distanceMeters));
 
             double kP = 0.02;
-            double turnPower = kP * (tx-offsetCAngle);
+            double turnPower = kP * (tx+1.0);
             turnPower = Math.max(-0.3, Math.min(0.3, turnPower));
             if (Math.abs(tx) < 1.0) turnPower = 0;
 
@@ -375,19 +376,20 @@ public class DecodeAutoRedFrontNew extends OpMode {
                 break;
 
             case POINT_TO_SHOOT:
-                if (rotate(ROTATE_SPEED, 40.5, AngleUnit.DEGREES, 1.0)) {
+                if (rotate(ROTATE_SPEED, -40.5, AngleUnit.DEGREES, 0.0)) {
                     // Reset encoders, then back to RUN_WITHOUT_ENCODER
                     limelightOn = true;
                     boxServoTimer.reset();
-                    autonomousState = AutonomousState.LAUNCH;
+                    autonomousState = AutonomousState.LIMELIGHT;
                 }
                 break;
             case LIMELIGHT:
-                launcher.setVelocity(2225.0);
-                if (boxServoTimer.seconds() > 1.0) {
+                launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
+                if (boxServoTimer.seconds() > 0.5) {
                     limelightOn = false;
                     autonomousState = AutonomousState.LAUNCH;
                 }
+                break;
             case LAUNCH:
                 launch(true);
                 autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
@@ -419,7 +421,7 @@ public class DecodeAutoRedFrontNew extends OpMode {
 
             case ROTATING:
                 // Measures the heading/angle of the current robot with odometry and then rotates until it reaches zero because it negates itself.
-                if (rotate(ROTATE_SPEED, -odo.getHeading(AngleUnit.DEGREES), AngleUnit.DEGREES, 0.0)) {
+                if (rotate(ROTATE_SPEED, odo.getHeading(AngleUnit.DEGREES), AngleUnit.DEGREES, 0.0)) {
                     frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -455,7 +457,7 @@ public class DecodeAutoRedFrontNew extends OpMode {
                         }
                         break;
                 }
-                if ((driveModo == 1 || driveModo == 9) && rotate(ROTATE_SPEED, -90.0, AngleUnit.DEGREES, 0.0)) {
+                if ((driveModo == 1 || driveModo == 9) && rotate(ROTATE_SPEED, 90.0, AngleUnit.DEGREES, 0.0)) {
                     frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -474,7 +476,7 @@ public class DecodeAutoRedFrontNew extends OpMode {
                 if (drive(1.0, 54.0, DistanceUnit.INCH, 0.0, 0) && (driveModo == 3 || driveModo == 11)) {
                     driveModo += 1;
                 }
-                if ((driveModo == 4 || driveModo == 12) && rotate(ROTATE_SPEED, 90.0, AngleUnit.DEGREES, 0.2)) {
+                if ((driveModo == 4 || driveModo == 12) && rotate(ROTATE_SPEED, -90.0, AngleUnit.DEGREES, 0.2)) {
                     frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -524,7 +526,7 @@ public class DecodeAutoRedFrontNew extends OpMode {
                             break;
                     }
                 }
-                if ((driveModo == 6 || driveModo == 14) && rotate(ROTATE_SPEED, 40.8, AngleUnit.DEGREES, 0.0)) {
+                if ((driveModo == 6 || driveModo == 14) && rotate(ROTATE_SPEED, -40.8, AngleUnit.DEGREES, 0.0)) {
 
                     limelightOn = true;
                     boxServoTimer.reset();
@@ -598,16 +600,17 @@ public class DecodeAutoRedFrontNew extends OpMode {
 
             case PREPARE:
 
-                // Example velocity logic: close vs far
+                /* Example velocity logic: close vs far
                 if (distanceToGoalMm(true) / 25.4 < 80.0) {
-                    launcher.setVelocity(Math.ceil(23.333 * distanceToGoalMm(alliance) / 25.4));
+                    launcher.setVelocity(Math.ceil(29.032 * distanceToGoalMm(alliance) / 25.4));
                 } else {
                     launcher.setVelocity(Math.ceil(18.555 * distanceToGoalMm(alliance) / 25.4));
                 }
-
+*/
+                launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
                 // Wait for velocity or timeout
                 // So low because we just need to get the launcher going while the intake is running and the launcher already revs up pretty fast.
-                if (launcher.getVelocity() > (13.555 * distanceToGoalMm(alliance) / 25.4) || launcherSpinupTimer.seconds() > 2.0) {
+                if (launcher.getVelocity() > (LAUNCHER_MIN_VELOCITY) || launcherSpinupTimer.seconds() > 2.0) {
                     boxServo.setPosition(0.85); // open to feed
                     boxServoTimer.reset();
                     shotTimer.reset();
@@ -620,7 +623,9 @@ public class DecodeAutoRedFrontNew extends OpMode {
                 boxServo.setPosition(0.85);
                 leftFeeder.setPower(-1.0);
                 rightFeeder.setPower(1.0);
-                if (boxServoTimer.seconds() > 5.0 || distanceInch > 500.0) {
+                topWheel.setPower(-1.0); // Added -1.0
+                //added
+                if (boxServoTimer.seconds() > 1.3 || distanceInch > 500.0) {
                     boxServoTimer.reset();
                     shotTimer.reset();
                     launchState = LaunchState.LAUNCH;
@@ -716,8 +721,8 @@ public class DecodeAutoRedFrontNew extends OpMode {
             double TOLERANCE_MM = 10;
 
             double targetMm = angleUnit.toRadians(angle) * (TRACK_WIDTH_MM / 2.0);
-            double leftTargetPosition = (targetMm * TICKS_PER_MM);
-            double rightTargetPosition = -targetMm * TICKS_PER_MM;
+            double leftTargetPosition = -(targetMm * TICKS_PER_MM);
+            double rightTargetPosition = (targetMm * TICKS_PER_MM);
 
             if (!rotateTargetSet) {
                 frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
