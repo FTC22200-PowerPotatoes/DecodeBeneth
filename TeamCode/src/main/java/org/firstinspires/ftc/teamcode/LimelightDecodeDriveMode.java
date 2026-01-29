@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -144,6 +145,9 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             // HERE //
             YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
             limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
+
+            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(175.0, 0, 0, 12.663387);
+            launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
             double volts = laserAnalog.getVoltage();
 
