@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.unusedAuto;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
@@ -19,14 +19,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name="DecodeAutoGearRotation", group="Decode")
-public  class DecodeAutoGearRotation extends OpMode {
+@Autonomous(name="DecodeAutoRedBackOldNew", group="Decode")
+public  class DecodeAutoRedBackOldNew extends OpMode {
     private DcMotorEx launcher;
     // launcher velocities (tune to your hardware)
-    double LAUNCHER_TARGET_VELOCITY = 2100.0;
-    double LAUNCHER_MIN_VELOCITY = 2050.0;
+    double LAUNCHER_TARGET_VELOCITY = 2050.0;
+    double LAUNCHER_MIN_VELOCITY = 2000.0;
 
     double shotsToFire = 3.0;
+    boolean secondShot = false;
     double TIME_BETWEEN_SHOTS = 3.0;    // reduced cycle time (tune)
     double boxServoTime = 0.7;          // servo dwell time (tune)
     double robotRotationAngle = -40.5;
@@ -51,13 +52,13 @@ public  class DecodeAutoGearRotation extends OpMode {
     // Distance from starting position (front of red basket) to the shoot spot (edge where lines meet)
     final double SHOOT_POSITION_DISTANCE_IN = 48.0;      // <-- tune this to place robot at the meeting point of lines
     // Distance to drive BACK into the middle of the field after shooting
-    final double GOBACK_DISTANCE_IN = 24.0;    // <-- tune to move into middle of field
+    final double RETURN_TO_MIDDLE_DISTANCE_IN = 24.0;    // <-- tune to move into middle of field
 
-    private DcMotorEx frontLeft = null;
-    private DcMotorEx backLeft = null;
+    private DcMotorEx leftFront = null;
+    private DcMotorEx leftBack = null;
     boolean isValid = false;
-    private DcMotorEx frontRight = null;
-    private DcMotorEx backRight = null;
+    private DcMotorEx rightFront = null;
+    private DcMotorEx rightBack = null;
     private DcMotor intakeMotor = null;
     private Servo boxServo = null;
     CRServo leftFeeder;
@@ -74,12 +75,15 @@ public  class DecodeAutoGearRotation extends OpMode {
         POINT_TO_SHOOT,
         LAUNCH,
         WAIT_FOR_LAUNCH,
-        GOBACK,
+        RETURN_TO_MIDDLE,
         ROTATING,
         LIMELIGHT,
         DRIVETONEXTBALLSY,
         ROTATETOBALLS,
         DRIVETONEXTBALLSX,
+        DRIVEOPP,
+        ROTATETOGOAL2,
+        DRIVETOBACKY,
         COMPLETE
     }
     private AutonomousState autonomousState;
@@ -94,10 +98,10 @@ public  class DecodeAutoGearRotation extends OpMode {
         launchState = LaunchState.IDLE;
 
         // Hardware mapping
-        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
-        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
-        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
+        leftFront = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        leftBack = hardwareMap.get(DcMotorEx.class, "backLeft");
+        rightFront = hardwareMap.get(DcMotorEx.class, "frontRight");
+        rightBack = hardwareMap.get(DcMotorEx.class, "backRight");
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         launcher = hardwareMap.get(DcMotorEx.class, "launcherMotor");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
@@ -106,10 +110,10 @@ public  class DecodeAutoGearRotation extends OpMode {
         topWheel = hardwareMap.get(CRServo.class, "topWheel");
 
         // Motor directions
-        frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        backLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        frontRight.setDirection(DcMotorEx.Direction.REVERSE);
-        backRight.setDirection(DcMotorEx.Direction.REVERSE);
+        leftFront.setDirection(DcMotorEx.Direction.FORWARD);
+        leftBack.setDirection(DcMotorEx.Direction.FORWARD);
+        rightFront.setDirection(DcMotorEx.Direction.REVERSE);
+        rightBack.setDirection(DcMotorEx.Direction.REVERSE);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         launcher.setDirection(DcMotorEx.Direction.FORWARD);
 
@@ -117,15 +121,15 @@ public  class DecodeAutoGearRotation extends OpMode {
         limelight.pipelineSwitch(8);
 
         // Reset encoders & braking
-        frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-        frontLeft.setZeroPowerBehavior(BRAKE);
-        backLeft.setZeroPowerBehavior(BRAKE);
-        frontRight.setZeroPowerBehavior(BRAKE);
-        backRight.setZeroPowerBehavior(BRAKE);
+        leftFront.setZeroPowerBehavior(BRAKE);
+        leftBack.setZeroPowerBehavior(BRAKE);
+        rightFront.setZeroPowerBehavior(BRAKE);
+        rightBack.setZeroPowerBehavior(BRAKE);
         intakeMotor.setZeroPowerBehavior(BRAKE);
         launcher.setZeroPowerBehavior(BRAKE);
 
@@ -199,10 +203,10 @@ public  class DecodeAutoGearRotation extends OpMode {
             case POINT_TO_SHOOT:
                 // Drive forward from start to shooting spot (distance positive = forward)
                 if(rotate(ROTATE_SPEED, -robotRotationAngle, AngleUnit.DEGREES,1)){
-                    frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     resetDriveFlags();
                     // prepare launcher sequence
                     if (limelightOn) {
@@ -215,7 +219,7 @@ public  class DecodeAutoGearRotation extends OpMode {
                 break;
             case LIMELIGHT:
 
-                if (rotateToTag(1.0, 1.0) || boxServoTimer.seconds() > 0.5) {
+                if (rotateToTag(1.0, 1.0) || boxServoTimer.seconds() > 1.0) {
                     resetDriveFlags();
                     autonomousState = AutonomousState.LAUNCH;
                 }
@@ -244,24 +248,29 @@ public  class DecodeAutoGearRotation extends OpMode {
                 }
                 break;
 
-            case GOBACK:
+            case RETURN_TO_MIDDLE:
                 // Drive BACK toward middle of field; here we use a positive distance to drive forward
                 // because our drive() interprets "distance" direction consistently per call.
-                if (drive(DRIVE_SPEED, -6.0, DistanceUnit.INCH, 0.2)) {
-                    resetDriveFlags();
-                    autonomousState = AutonomousState.ROTATETOBALLS;
+                if (!secondShot) {
+                    if (drive(DRIVE_SPEED, 20.0, DistanceUnit.INCH, 0.2)) {
+                        resetDriveFlags();
+                        autonomousState = AutonomousState.ROTATETOBALLS;
+                    }
+                } else {
+                    if (drive(DRIVE_SPEED, 16.0, DistanceUnit.INCH, 0.2))
+                        autonomousState = AutonomousState.COMPLETE;
                 }
                 break;
 
             case ROTATING:
                 if(rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES,0.2)){
-                    frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     resetDriveFlags();
                     if (driveOffLine) {
-                        autonomousState = AutonomousState.GOBACK;
+                        autonomousState = AutonomousState.RETURN_TO_MIDDLE;
                     } else {
                         autonomousState = AutonomousState.COMPLETE;
                     }
@@ -275,26 +284,56 @@ public  class DecodeAutoGearRotation extends OpMode {
                 break;
             case ROTATETOBALLS:
                 if(rotate(ROTATE_SPEED, -155.0, AngleUnit.DEGREES,0.2)) {
-                    frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     resetDriveFlags();
                     autonomousState = AutonomousState.DRIVETONEXTBALLSX;
                 }
                 break;
             case DRIVETONEXTBALLSX:
-                if (drive(1.0, -36.0, DistanceUnit.INCH, 0.2)) {
+                leftFeeder.setPower(-1.0);
+                rightFeeder.setPower(1.0);
+                topWheel.setPower(-0.3);
+                intakeMotor.setPower(1.0);
+                if (drive(1.0, -42.0, DistanceUnit.INCH, 0.2)) {
                     resetDriveFlags();
-                    autonomousState = AutonomousState.COMPLETE;
+                    autonomousState = AutonomousState.DRIVEOPP;
+                }
+                break;
+            case DRIVEOPP:
+                leftFeeder.setPower(0.0);
+                rightFeeder.setPower(0.0);
+                topWheel.setPower(0.0);
+                intakeMotor.setPower(0.0);
+                if (drive(1.0, 42.0, DistanceUnit.INCH, 0.2)) {
+                    resetDriveFlags();
+                    autonomousState = AutonomousState.ROTATETOGOAL2;
+                }
+            case ROTATETOGOAL2:
+                if(rotate(ROTATE_SPEED, 155.0, AngleUnit.DEGREES,0.2)) {
+                    leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    resetDriveFlags();
+                    autonomousState = AutonomousState.DRIVETONEXTBALLSX;
+                }
+                break;
+            case DRIVETOBACKY:
+                if (drive(DRIVE_SPEED, -26.0, DistanceUnit.INCH, 0.2)) {
+                    resetDriveFlags();
+                    secondShot = true;
+                    autonomousState = AutonomousState.POINT_TO_SHOOT;
                 }
                 break;
             case COMPLETE:
                 // stop all motion
-                frontLeft.setPower(0);
-                backLeft.setPower(0);
-                frontRight.setPower(0);
-                backRight.setPower(0);
+                leftFront.setPower(0);
+                leftBack.setPower(0);
+                rightFront.setPower(0);
+                rightBack.setPower(0);
                 intakeMotor.setPower(0);
                 launcher.setVelocity(0);
                 leftFeeder.setPower(0.0);
@@ -378,32 +417,32 @@ public  class DecodeAutoGearRotation extends OpMode {
 
         if (!driveTargetSet) {
             // reset encoders so target is relative to current pose
-            frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-            frontLeft.setTargetPosition((int) targetPosition);
-            backLeft.setTargetPosition((int) targetPosition);
-            frontRight.setTargetPosition((int) targetPosition);
-            backRight.setTargetPosition((int) targetPosition);
+            leftFront.setTargetPosition((int) targetPosition);
+            leftBack.setTargetPosition((int) targetPosition);
+            rightFront.setTargetPosition((int) targetPosition);
+            rightBack.setTargetPosition((int) targetPosition);
 
-            frontLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            backLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            frontRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            backRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            leftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            leftBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            rightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            rightBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-            frontLeft.setPower(Math.abs(speed));
-            backLeft.setPower(Math.abs(speed));
-            frontRight.setPower(Math.abs(speed));
-            backRight.setPower(Math.abs(speed));
+            leftFront.setPower(Math.abs(speed));
+            leftBack.setPower(Math.abs(speed));
+            rightFront.setPower(Math.abs(speed));
+            rightBack.setPower(Math.abs(speed));
 
             driveTimer.reset();
             driveTargetSet = true;
         }
 
         // If not at target, reset hold timer
-        if (Math.abs(targetPosition - frontLeft.getCurrentPosition()) > (TOLERANCE_MM * TICKS_PER_MM)) {
+        if (Math.abs(targetPosition - leftFront.getCurrentPosition()) > (TOLERANCE_MM * TICKS_PER_MM)) {
             driveTimer.reset();
         }
 
@@ -427,20 +466,20 @@ public  class DecodeAutoGearRotation extends OpMode {
 
         // stop if centered
         if (Math.abs(tx) < toleranceDeg) {
-            frontLeft.setPower(0);
-            backLeft.setPower(0);
-            frontRight.setPower(0);
-            backRight.setPower(0);
+            leftFront.setPower(0);
+            leftBack.setPower(0);
+            rightFront.setPower(0);
+            rightBack.setPower(0);
             telemetry.addData("IGOTNOIDEA ", toleranceDeg);
             telemetry.update();
             return true;
         }
 
         // apply rotation
-        frontLeft.setPower(-turn);
-        backLeft.setPower(-turn);
-        frontRight.setPower(turn);
-        backRight.setPower(turn);
+        leftFront.setPower(-turn);
+        leftBack.setPower(-turn);
+        rightFront.setPower(turn);
+        rightBack.setPower(turn);
 
         telemetry.addData("it' s turning", turn);
         telemetry.update();
@@ -459,31 +498,31 @@ public  class DecodeAutoGearRotation extends OpMode {
         double rightTargetPosition = targetMm * TICKS_PER_MM;
 
         if (!rotateTargetSet) {
-            frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-            frontLeft.setTargetPosition((int) leftTargetPosition);
-            backLeft.setTargetPosition((int) leftTargetPosition);
-            frontRight.setTargetPosition((int) rightTargetPosition);
-            backRight.setTargetPosition((int) rightTargetPosition);
+            leftFront.setTargetPosition((int) leftTargetPosition);
+            leftBack.setTargetPosition((int) leftTargetPosition);
+            rightFront.setTargetPosition((int) rightTargetPosition);
+            rightBack.setTargetPosition((int) rightTargetPosition);
 
-            frontLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            backLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            frontRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            backRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            leftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            leftBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            rightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            rightBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-            frontLeft.setPower(Math.abs(speed));
-            backLeft.setPower(Math.abs(speed));
-            frontRight.setPower(Math.abs(speed));
-            backRight.setPower(Math.abs(speed));
+            leftFront.setPower(Math.abs(speed));
+            leftBack.setPower(Math.abs(speed));
+            rightFront.setPower(Math.abs(speed));
+            rightBack.setPower(Math.abs(speed));
 
             driveTimer.reset();
             rotateTargetSet = true;
         }
 
-        if ((Math.abs(leftTargetPosition - frontLeft.getCurrentPosition())) > (TOLERANCE_MM * TICKS_PER_MM)) {
+        if ((Math.abs(leftTargetPosition - leftFront.getCurrentPosition())) > (TOLERANCE_MM * TICKS_PER_MM)) {
             driveTimer.reset();
         }
 

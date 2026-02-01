@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.unusedAuto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,24 +8,24 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 //@Disabled
 public class auto_right extends LinearOpMode {
 
-    private DcMotor frontLeft = null;
-    private DcMotor backLeft = null;
-    private DcMotor frontRight = null;
-    private DcMotor backRight = null;
+    private DcMotor leftFront = null;
+    private DcMotor leftBack = null;
+    private DcMotor rightFront = null;
+    private DcMotor rightBack = null;
 
     @Override
     public void runOpMode() {
         // Initialize the motors
-        frontLeft = hardwareMap.dcMotor.get("frontLeft");
-        backLeft = hardwareMap.dcMotor.get("backLeft");
-        frontRight = hardwareMap.dcMotor.get("frontRight");
-        backRight = hardwareMap.dcMotor.get("backRight");
+        leftFront = hardwareMap.dcMotor.get("frontLeft");
+        leftBack = hardwareMap.dcMotor.get("backLeft");
+        rightFront = hardwareMap.dcMotor.get("frontRight");
+        rightBack = hardwareMap.dcMotor.get("backRight");
 
         // Set motor directions
-        frontLeft.setDirection(DcMotor.Direction.FORWARD);
-        backLeft.setDirection(DcMotor.Direction.FORWARD);
-        frontRight.setDirection(DcMotor.Direction.REVERSE);
-        backRight.setDirection(DcMotor.Direction.REVERSE);
+        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        leftBack.setDirection(DcMotor.Direction.FORWARD);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        rightBack.setDirection(DcMotor.Direction.REVERSE);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -47,9 +47,9 @@ public class auto_right extends LinearOpMode {
     }
 
     private void setMotorPower(double fl, double fr, double bl, double br) {
-        frontLeft.setPower(fl);
-        frontRight.setPower(fr);
-        backLeft.setPower(bl);
-        backRight.setPower(br);
+        leftFront.setPower(fl);
+        rightFront.setPower(fr);
+        leftBack.setPower(bl);
+        rightBack.setPower(br);
     }
 }

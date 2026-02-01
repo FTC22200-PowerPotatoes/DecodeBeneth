@@ -17,10 +17,10 @@ public class sensor_redOpMode extends LinearOpMode {
 
         ColorSensor colorSensor;
         // Motor config
-        DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
-        DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
-        DcMotor frontRight = hardwareMap.dcMotor.get("frontRight");
-        DcMotor backRight = hardwareMap.dcMotor.get("backRight");
+        DcMotor leftFront = hardwareMap.dcMotor.get("frontLeft");
+        DcMotor leftBack = hardwareMap.dcMotor.get("backLeft");
+        DcMotor rightFront = hardwareMap.dcMotor.get("frontRight");
+        DcMotor rightBack = hardwareMap.dcMotor.get("backRight");
         DcMotor linearMotor = hardwareMap.dcMotor.get("linearMotor");
         linearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
@@ -38,10 +38,10 @@ public class sensor_redOpMode extends LinearOpMode {
         rightWheelServo.setPosition(0.5);
         boxServo.setPosition(0.87);
 
-        frontLeft.setDirection(DcMotor.Direction.FORWARD);
-        backLeft.setDirection(DcMotor.Direction.FORWARD);
-        frontRight.setDirection(DcMotor.Direction.REVERSE);
-        backRight.setDirection(DcMotor.Direction.REVERSE);
+        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        leftBack.setDirection(DcMotor.Direction.FORWARD);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        rightBack.setDirection(DcMotor.Direction.REVERSE);
         linearMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         wristMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -80,15 +80,15 @@ public class sensor_redOpMode extends LinearOpMode {
             double x = gamepad1.left_stick_x * 1.1 * speedMultiplier; // The 1.1 multiplier is to counteract imperfect strafing
             double rx = -gamepad1.right_stick_x * speedMultiplier; // Turning left/right
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1); // Ensures motor values stay within [-1, 1]
-            double fL_Motor = (y + x + rx) / denominator; // fL = FrontLeft
-            double bL_Motor = (y - x + rx) / denominator; // bL = BackLeft
-            double fR_Motor = (y - x - rx) / denominator; // fR = FrontRight
-            double bR_Motor = (y + x - rx) / denominator; // bR = BackRight
+            double fL_Motor = (y + x + rx) / denominator; // fL = leftFront
+            double bL_Motor = (y - x + rx) / denominator; // bL = leftBack
+            double fR_Motor = (y - x - rx) / denominator; // fR = rightFront
+            double bR_Motor = (y + x - rx) / denominator; // bR = rightBack
 
-            frontLeft.setPower(fL_Motor);
-            backLeft.setPower(bL_Motor);
-            frontRight.setPower(fR_Motor);
-            backRight.setPower(bR_Motor);
+            leftFront.setPower(fL_Motor);
+            leftBack.setPower(bL_Motor);
+            rightFront.setPower(fR_Motor);
+            rightBack.setPower(bR_Motor);
 
             // Linear motor control
             if (gamepad2.right_bumper) {

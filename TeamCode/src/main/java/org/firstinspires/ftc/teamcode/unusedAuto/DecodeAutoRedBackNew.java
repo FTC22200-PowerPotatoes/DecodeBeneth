@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.unusedAuto;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
@@ -25,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
 import java.util.Locale;
 
@@ -85,10 +86,10 @@ public class DecodeAutoRedBackNew extends OpMode {
     final double SHOOT_POSITION_DISTANCE_IN = 48.0;
     final double RETURN_TO_MIDDLE_DISTANCE_IN = 24.0;
 
-    private DcMotorEx frontLeft = null;
-    private DcMotorEx backLeft = null;
-    private DcMotorEx frontRight = null;
-    private DcMotorEx backRight = null;
+    private DcMotorEx leftFront = null;
+    private DcMotorEx leftBack = null;
+    private DcMotorEx rightFront = null;
+    private DcMotorEx rightBack = null;
     private DcMotor intakeMotor = null;
     private Servo boxServo = null;
     boolean followMotiff = true;
@@ -130,10 +131,10 @@ public class DecodeAutoRedBackNew extends OpMode {
 
         // Hardware mapping
         laserAnalog = hardwareMap.get(AnalogInput.class, "laserAnalogInput");
-        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
-        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
-        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
+        leftFront = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        leftBack = hardwareMap.get(DcMotorEx.class, "backLeft");
+        rightFront = hardwareMap.get(DcMotorEx.class, "frontRight");
+        rightBack = hardwareMap.get(DcMotorEx.class, "backRight");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         launcher = hardwareMap.get(DcMotorEx.class, "launcherMotor");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
@@ -187,29 +188,29 @@ public class DecodeAutoRedBackNew extends OpMode {
         telemetry.addData("Heading Scalar", odo.getYawScalar());
 
         // Motor directions
-        frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        backLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        frontRight.setDirection(DcMotorEx.Direction.REVERSE);
-        backRight.setDirection(DcMotorEx.Direction.REVERSE);
+        leftFront.setDirection(DcMotorEx.Direction.FORWARD);
+        leftBack.setDirection(DcMotorEx.Direction.FORWARD);
+        rightFront.setDirection(DcMotorEx.Direction.REVERSE);
+        rightBack.setDirection(DcMotorEx.Direction.REVERSE);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         launcher.setDirection(DcMotorEx.Direction.FORWARD);
 
         // Reset encoders & braking
-        frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         // Default to RUN_WITHOUT_ENCODER; drive() / rotate() will switch to RUN_TO_POSITION as needed
-        frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        leftFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        frontLeft.setZeroPowerBehavior(BRAKE);
-        backLeft.setZeroPowerBehavior(BRAKE);
-        frontRight.setZeroPowerBehavior(BRAKE);
-        backRight.setZeroPowerBehavior(BRAKE);
+        leftFront.setZeroPowerBehavior(BRAKE);
+        leftBack.setZeroPowerBehavior(BRAKE);
+        rightFront.setZeroPowerBehavior(BRAKE);
+        rightBack.setZeroPowerBehavior(BRAKE);
         intakeMotor.setZeroPowerBehavior(BRAKE);
         launcher.setZeroPowerBehavior(BRAKE);
 
@@ -421,10 +422,10 @@ public class DecodeAutoRedBackNew extends OpMode {
             case ROTATING:
                 // Measures the heading/angle of the current robot with odometry and then rotates until it reaches zero because it negates itself.
                 if (rotate(ROTATE_SPEED, -40.8, AngleUnit.DEGREES, 0.0)) {
-                    frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
                     if (driveModo < 6) {
                         driveModo = 0;
                     } else {
@@ -452,10 +453,10 @@ public class DecodeAutoRedBackNew extends OpMode {
                         break;
                 }
                 if ((driveModo == 1 || driveModo == 9) && rotate(ROTATE_SPEED, -90.0, AngleUnit.DEGREES, 0.0)) {
-                    frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
                     driveModo += 1;
                 }
@@ -466,10 +467,10 @@ public class DecodeAutoRedBackNew extends OpMode {
                     driveModo += 1;
                 }
                 if ((driveModo == 4 || driveModo == 12) && rotate(ROTATE_SPEED, 90.0, AngleUnit.DEGREES, 0.2)) {
-                    frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                    backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                    rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
                     driveModo += 1;
                 }
@@ -560,10 +561,10 @@ public class DecodeAutoRedBackNew extends OpMode {
                 rightFeeder.setPower(0.0);
                 topWheel.setPower(0.0);
                 intakeMotor.setPower(0.0);
-                frontLeft.setPower(0.0);
-                frontRight.setPower(0.0);
-                backLeft.setPower(0.0);
-                backRight.setPower(0.0);
+                leftFront.setPower(0.0);
+                rightFront.setPower(0.0);
+                leftBack.setPower(0.0);
+                rightBack.setPower(0.0);
                 autoPos = odo.getPosition();
                 break;
         }
@@ -640,20 +641,20 @@ public class DecodeAutoRedBackNew extends OpMode {
         double targetPosition = (distanceUnit.toMm(distance) * TICKS_PER_MM);
 
         if (!driveTargetSet) {
-            frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-            frontLeft.setTargetPosition((int) targetPosition);
-            backLeft.setTargetPosition((int) targetPosition);
-            frontRight.setTargetPosition((int) targetPosition);
-            backRight.setTargetPosition((int) targetPosition);
+            leftFront.setTargetPosition((int) targetPosition);
+            leftBack.setTargetPosition((int) targetPosition);
+            rightFront.setTargetPosition((int) targetPosition);
+            rightBack.setTargetPosition((int) targetPosition);
 
-            frontLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            backLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            frontRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            backRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            leftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            leftBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            rightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            rightBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
             double forward = Math.abs(speed);
 
@@ -664,28 +665,28 @@ public class DecodeAutoRedBackNew extends OpMode {
             leftPower  = Math.max(-1, Math.min(1, leftPower));
             rightPower = Math.max(-1, Math.min(1, rightPower));
 
-            frontLeft.setPower(leftPower);
-            backLeft.setPower(leftPower);
-            frontRight.setPower(rightPower);
-            backRight.setPower(rightPower);
+            leftFront.setPower(leftPower);
+            leftBack.setPower(leftPower);
+            rightFront.setPower(rightPower);
+            rightBack.setPower(rightPower);
 
             driveTimer.reset();
             driveTargetSet = true;
         }
 
-        if (Math.abs(targetPosition - frontLeft.getCurrentPosition()) > (TOLERANCE_MM * TICKS_PER_MM)) {
-            frontLeft.setZeroPowerBehavior(BRAKE);
-            backLeft.setZeroPowerBehavior(BRAKE);
-            frontRight.setZeroPowerBehavior(BRAKE);
-            backRight.setZeroPowerBehavior(BRAKE);
+        if (Math.abs(targetPosition - leftFront.getCurrentPosition()) > (TOLERANCE_MM * TICKS_PER_MM)) {
+            leftFront.setZeroPowerBehavior(BRAKE);
+            leftBack.setZeroPowerBehavior(BRAKE);
+            rightFront.setZeroPowerBehavior(BRAKE);
+            rightBack.setZeroPowerBehavior(BRAKE);
             intakeMotor.setZeroPowerBehavior(BRAKE);
             launcher.setZeroPowerBehavior(BRAKE);
             driveTimer.reset();
         } else {
-            frontLeft.setZeroPowerBehavior(FLOAT);
-            backLeft.setZeroPowerBehavior(FLOAT);
-            frontRight.setZeroPowerBehavior(FLOAT);
-            backRight.setZeroPowerBehavior(FLOAT);
+            leftFront.setZeroPowerBehavior(FLOAT);
+            leftBack.setZeroPowerBehavior(FLOAT);
+            rightFront.setZeroPowerBehavior(FLOAT);
+            rightBack.setZeroPowerBehavior(FLOAT);
             intakeMotor.setZeroPowerBehavior(FLOAT);
             launcher.setZeroPowerBehavior(FLOAT);
         }
@@ -708,43 +709,43 @@ public class DecodeAutoRedBackNew extends OpMode {
             double rightTargetPosition = (targetMm * TICKS_PER_MM);
 
             if (!rotateTargetSet) {
-                frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-                backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+                rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-                frontLeft.setTargetPosition((int) leftTargetPosition);
-                backLeft.setTargetPosition((int) leftTargetPosition);
-                frontRight.setTargetPosition((int) rightTargetPosition);
-                backRight.setTargetPosition((int) rightTargetPosition);
+                leftFront.setTargetPosition((int) leftTargetPosition);
+                leftBack.setTargetPosition((int) leftTargetPosition);
+                rightFront.setTargetPosition((int) rightTargetPosition);
+                rightBack.setTargetPosition((int) rightTargetPosition);
 
-                frontLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-                backLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-                frontRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-                backRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+                leftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+                leftBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+                rightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+                rightBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-                frontLeft.setPower(Math.abs(speed));
-                backLeft.setPower(Math.abs(speed));
-                frontRight.setPower(Math.abs(speed));
-                backRight.setPower(Math.abs(speed));
+                leftFront.setPower(Math.abs(speed));
+                leftBack.setPower(Math.abs(speed));
+                rightFront.setPower(Math.abs(speed));
+                rightBack.setPower(Math.abs(speed));
 
                 driveTimer.reset();
                 rotateTargetSet = true;
             }
 
-            if (Math.abs(leftTargetPosition - frontLeft.getCurrentPosition()) > (TOLERANCE_MM * TICKS_PER_MM)) {
-                frontLeft.setZeroPowerBehavior(BRAKE);
-                backLeft.setZeroPowerBehavior(BRAKE);
-                frontRight.setZeroPowerBehavior(BRAKE);
-                backRight.setZeroPowerBehavior(BRAKE);
+            if (Math.abs(leftTargetPosition - leftFront.getCurrentPosition()) > (TOLERANCE_MM * TICKS_PER_MM)) {
+                leftFront.setZeroPowerBehavior(BRAKE);
+                leftBack.setZeroPowerBehavior(BRAKE);
+                rightFront.setZeroPowerBehavior(BRAKE);
+                rightBack.setZeroPowerBehavior(BRAKE);
                 intakeMotor.setZeroPowerBehavior(BRAKE);
                 launcher.setZeroPowerBehavior(BRAKE);
                 driveTimer.reset();
             } else {
-                frontLeft.setZeroPowerBehavior(FLOAT);
-                backLeft.setZeroPowerBehavior(FLOAT);
-                frontRight.setZeroPowerBehavior(FLOAT);
-                backRight.setZeroPowerBehavior(FLOAT);
+                leftFront.setZeroPowerBehavior(FLOAT);
+                leftBack.setZeroPowerBehavior(FLOAT);
+                rightFront.setZeroPowerBehavior(FLOAT);
+                rightBack.setZeroPowerBehavior(FLOAT);
                 intakeMotor.setZeroPowerBehavior(FLOAT);
                 launcher.setZeroPowerBehavior(FLOAT);
                 driveTimer.reset();

@@ -67,6 +67,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
     private DcMotorEx frontRight = null;
     private DcMotorEx backRight = null;
     private DcMotor intakeMotor = null;
+    private DcMotor boxMotor;
     private Servo boxServo = null;
     CRServo leftFeeder;
     CRServo rightFeeder;
@@ -126,6 +127,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
         boxServo = hardwareMap.get(Servo.class, "boxServo");
         topWheel = hardwareMap.get(CRServo.class, "topWheel");
+        boxMotor = hardwareMap.get(DcMotorEx.class, "boxMotor");
 
         // Motor directions
         frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
@@ -504,7 +506,6 @@ public  class DecodeAutoBlueBackOld extends OpMode {
     boolean drive(double speed, double distance, DistanceUnit distanceUnit, double holdSeconds) {
         final double TOLERANCE_MM = 10;
         double targetPosition = (distanceUnit.toMm(distance) * TICKS_PER_MM);
-
         if (!driveTargetSet) {
             // reset encoders so target is relative to current pose
             frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);

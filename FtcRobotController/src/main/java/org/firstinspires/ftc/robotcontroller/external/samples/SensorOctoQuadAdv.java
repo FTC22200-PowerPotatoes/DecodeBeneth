@@ -144,10 +144,10 @@ class OctoSwerveDrive {
     private final List<OctoSwerveModule> allModules = new ArrayList<>();
 
     // members to hold encoder data for each module.
-    public final OctoSwerveModule LeftFront;
-    public final OctoSwerveModule RightFront;
-    public final OctoSwerveModule LeftBack;
-    public final OctoSwerveModule RightBack;
+    public final OctoSwerveModule leftFront;
+    public final OctoSwerveModule rightFront;
+    public final OctoSwerveModule leftBack;
+    public final OctoSwerveModule rightBack;
 
     // Prepare an object to hold an entire OctoQuad encoder readable register bank (pos and vel)
     private final OctoQuad.EncoderDataBlock encoderDataBlock = new OctoQuad.EncoderDataBlock();
@@ -178,10 +178,10 @@ class OctoSwerveDrive {
         //  the wheels are facing forward.  Also verify that the correct module values change
         //  appropriately when you manually spin (drive) and rotate (steer) a wheel.
 
-        allModules.add(LeftFront  = new OctoSwerveModule(octoquad, "LF ",0,0));// Drive=0, Steer=4
-        allModules.add(RightFront = new OctoSwerveModule(octoquad, "RF ",1,0));// Drive=1, Steer=5
-        allModules.add(LeftBack   = new OctoSwerveModule(octoquad, "LB ",2,0));// Drive=2, Steer=6
-        allModules.add(RightBack  = new OctoSwerveModule(octoquad, "RB ",3,0));// Drive=3, Steer=7
+        allModules.add(leftFront  = new OctoSwerveModule(octoquad, "FL ",0,0));// Drive=0, Steer=4
+        allModules.add(rightFront = new OctoSwerveModule(octoquad, "FR ",1,0));// Drive=1, Steer=5
+        allModules.add(leftBack   = new OctoSwerveModule(octoquad, "BL ",2,0));// Drive=2, Steer=6
+        allModules.add(rightBack  = new OctoSwerveModule(octoquad, "BR ",3,0));// Drive=3, Steer=7
 
         // now make sure the settings persist through any power glitches.
         octoquad.saveParametersToFlash();

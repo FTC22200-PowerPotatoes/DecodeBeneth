@@ -39,10 +39,10 @@ public class DecodeDriveMode extends LinearOpMode {
         ColorSensor colorSensor;
         // Motor config
         //laserAnalog = hardwareMap.get(AnalogInput.class, "laserAnalogInput");
-        DcMotorEx frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        DcMotorEx backLeft = hardwareMap.get(DcMotorEx.class,"backLeft");
-        DcMotorEx frontRight = hardwareMap.get(DcMotorEx.class,"frontRight");
-        DcMotorEx backRight = hardwareMap.get(DcMotorEx.class, "backRight");
+        DcMotorEx leftFront = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        DcMotorEx leftBack = hardwareMap.get(DcMotorEx.class,"backLeft");
+        DcMotorEx rightFront = hardwareMap.get(DcMotorEx.class,"frontRight");
+        DcMotorEx rightBack = hardwareMap.get(DcMotorEx.class, "backRight");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
@@ -52,14 +52,14 @@ public class DecodeDriveMode extends LinearOpMode {
         rgbLight = hardwareMap.get(Servo.class, "RGB Light");
 
         // Motor directions
-        frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        backLeft.setDirection(DcMotorEx.Direction.FORWARD);
-        frontRight.setDirection(DcMotorEx.Direction.REVERSE);
-        backRight.setDirection(DcMotorEx.Direction.REVERSE);
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftFront.setDirection(DcMotorEx.Direction.FORWARD);
+        leftBack.setDirection(DcMotorEx.Direction.FORWARD);
+        rightFront.setDirection(DcMotorEx.Direction.REVERSE);
+        rightBack.setDirection(DcMotorEx.Direction.REVERSE);
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         launcher.setDirection(DcMotorEx.Direction.FORWARD);
 
@@ -117,15 +117,15 @@ public class DecodeDriveMode extends LinearOpMode {
             double speedMultiplier = 1.0;
             if (gamepad1.left_trigger > 0.5) {
                 speedMultiplier *= 0.4; // Original - prev was 0.5
-                frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-                frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-                backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-                backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+                leftFront.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+                rightFront.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+                leftBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+                rightBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             } else {
-                frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-                frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-                backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-                backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+                leftFront.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+                rightFront.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+                leftBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+                rightBack.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
             }
 
             // Drive calculations
@@ -176,10 +176,10 @@ public class DecodeDriveMode extends LinearOpMode {
                 telemetry.addData("Turn Power: ", turnPower);
             }
             // Regular Motor Controls
-            frontLeft.setPower(fL_Motor);
-            backLeft.setPower(bL_Motor);
-            frontRight.setPower(fR_Motor);
-            backRight.setPower(bR_Motor);
+            leftFront.setPower(fL_Motor);
+            leftBack.setPower(bL_Motor);
+            rightFront.setPower(fR_Motor);
+            rightBack.setPower(bR_Motor);
 
 
             // Intake motor's control

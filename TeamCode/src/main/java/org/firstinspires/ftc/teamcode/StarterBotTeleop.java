@@ -25,7 +25,7 @@ public class StarterBotTeleop extends OpMode {
 
     @Override
     public void init() {
-        leftDrive = hardwareMap.get(DcMotor.class, "left_drive");
+        leftDrive = hardwareMap.get(DcMotor.class, "frontLeft");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");

@@ -1,31 +1,38 @@
 package org.firstinspires.ftc.teamcode;
 
 
-import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 
+
+// For limelight
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.IMU;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-import java.util.List;
+
 import java.util.Locale;
+
 
 @TeleOp
 public class LimelightDecodeDriveMode extends LinearOpMode {
@@ -36,17 +43,29 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
     double oldTime = 0;
     boolean alliance = true;
     boolean boxServoUp = false;
+    int motiffID = 20;
 
     private AnalogInput laserAnalog;
+    public double highVelocity = 1500.0;
+    public double lowVelocity = 900.0;
+    double curTargetVelocity = highVelocity;
+    double F = 0.0;
+    double P = 0.0;
+    double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001};
+    int stepIndex = 1;
+    private double distance;
     private static final double MAX_VOLTS = 3.3;
     private static final double MAX_DISTANCE_MM = 4000.0;
     private ElapsedTime boxServoTimer = new ElapsedTime();
     private DcMotor intakeMotor;
     private DcMotorEx launcher;
+    private DcMotor boxMotor;
     CRServo leftFeeder;
     CRServo rightFeeder;
     CRServo topWheel;
     Servo rgbLight; // For color
+
+
 
     // HERE //
     private Limelight3A limelight;
@@ -56,6 +75,7 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
     public void runOpMode() {
         ColorSensor colorSensor;
         // Motor config`
+
 
         laserAnalog = hardwareMap.get(AnalogInput.class, "laserAnalogInput");
         DcMotorEx frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
@@ -68,8 +88,10 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         topWheel = hardwareMap.get(CRServo.class, "topWheel");
         Servo boxServo = hardwareMap.get(Servo.class, "boxServo");
         launcher = hardwareMap.get(DcMotorEx.class, "launcherMotor");
+        boxMotor = hardwareMap.get(DcMotorEx.class, "boxMotor");
         colorSensor = hardwareMap.get(ColorSensor.class, "Color Sensor");
         rgbLight = hardwareMap.get(Servo.class, "RGB Light");
+
 
         // Motor directions
         frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
@@ -82,10 +104,13 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         launcher.setDirection(DcMotorEx.Direction.FORWARD);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         // Limelight initalization HERE!
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(8);
+
 
         // IMU HERE!
         imu = hardwareMap.get(IMU.class, "imu");
@@ -95,14 +120,18 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         );
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
+
         // Odometry setup
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
+
 
         // Type of odometry arm that the robot is using.
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
 
+
         //Direction
         odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
+
 
        /*
        Before running the robot, recalibrate the IMU. This needs to happen when the robot is stationary
@@ -132,35 +161,45 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         telemetry.addData("Heading Scalar", odo.getYawScalar());
         telemetry.update();
 
+
         final int CYCLE_MS = 5;
+
 
         waitForStart();
         if (isStopRequested()) return;
 
+
         // HERE //
         limelight.start();
+
 
         while (opModeIsActive()) {
             // HERE //
             YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
             limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
 
+
             double volts = laserAnalog.getVoltage();
+
 
             // Convert voltage to distance in millimeters (linear mapping)
             double distanceInch = ((volts / MAX_VOLTS) * MAX_DISTANCE_MM) * 25.4;
 
+
             odo.update();
+
 
             // Telemetry
             telemetry.addData("Voltage (V)", "%.3f", volts);
             telemetry.addData("Distance (mm)", "%.1f", distanceInch);
 
-            if (gamepad1.x || gamepad1.square) {
+
+            if (gamepad1.x) {
                 alliance = false;
-            } else if (gamepad1.b || gamepad1.circle) {
+            } else if (gamepad1.b) {
                 alliance = true;
             }
+
 
             int red = colorSensor.red();
             int blue = colorSensor.blue();
@@ -171,10 +210,14 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             telemetry.addData("Red", red);
             telemetry.addData("Blue", blue);
 
+
             double newTime = getRuntime();
             double loopTime = newTime - oldTime;
             double frequency = 1 / loopTime;
             oldTime = newTime;
+
+            // PIDF Rules
+
 
            /*
            gets the current Position (x & y in mm, and heading in degrees) of the robot, and prints it.
@@ -183,32 +226,34 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.getX(DistanceUnit.MM), pos.getY(DistanceUnit.MM), pos.getHeading(AngleUnit.DEGREES));
             telemetry.addData("Position", data);
 
+
            /*
            gets the current Velocity (x & y in mm/sec and heading in degrees/sec) and prints it.
             */
             String velocity = String.format(Locale.US, "{XVel: %.3f, YVel: %.3f, HVel: %.3f}", odo.getVelX(DistanceUnit.MM), odo.getVelY(DistanceUnit.MM), odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES));
             telemetry.addData("Velocity", velocity);
 
+
             if (gamepad2.dpad_up) { // high
-                launcher_velocity = 2225.0;
+                double calculatedRPM = calculateRPM(distance);
+                launcher_velocity = calculatedRPM; // AIDEN sucks bad >:((
             } else if (gamepad2.dpad_left) { // medium
-                launcher_velocity = 2100.0;
+                launcher_velocity = 1650.0;
             } else if (gamepad2.dpad_right) { // low-mid (new)
-                launcher_velocity = 1800.0;
+                launcher_velocity = 1375.0;
             } else if (gamepad2.dpad_down) { // low
-                launcher_velocity = 1500.0;
+                launcher_velocity = 1200.0;
             }
 
+
             if (gamepad2.right_trigger > 0) {
-                launcher.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
                 launch();
             } else if (gamepad2.left_trigger > 0) {
                 launcher.setPower(-1.0);
-                launcher.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
             } else {
                 launcher.setPower(0.0);
-                launcher.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             }
+
 
             double speedMultiplier = 1.0;
             if (gamepad1.left_trigger > 0.5) {
@@ -224,87 +269,111 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
             }
 
+
             // Drive calculations
             double y = -gamepad1.left_stick_y * speedMultiplier;
             double x = gamepad1.left_stick_x * 1.1 * speedMultiplier;
             double rx = -gamepad1.right_stick_x * speedMultiplier;
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
+
             // To decrease 'noise' via small movements
             if (Math.abs(x) < 0.05) x = 0;
             if (Math.abs(y) < 0.05) y = 0;
             if (Math.abs(rx) < 0.05) rx = 0;
+
 
             double fL_Motor = (y + x + rx) / denominator;
             double bL_Motor = (y - x + rx) / denominator;
             double fR_Motor = (y - x - rx) / denominator;
             double bR_Motor = (y + x - rx) / denominator;
 
+
+
+
             // Limelight alignment HERE //
             LLResult llResult = limelight.getLatestResult();
             boolean isValid = llResult != null && llResult.isValid();
 
+            if (gamepad1.y) {
+                if (curTargetVelocity == highVelocity) {
+                    curTargetVelocity = lowVelocity;
+                } else {
+                    curTargetVelocity = highVelocity;
+                }
+            }
+
+            // PID STUFF
+
+            if (gamepad1.b) {
+
+                stepIndex = (stepIndex + 1) % stepSizes.length;
+            }
+
+            if (gamepad1.dpad_right) {
+                F += stepSizes[stepIndex];
+            }
+            if (gamepad1.dpad_left) {
+                F -= stepSizes[stepIndex];
+            }
+
+            if (gamepad1.dpad_up) {
+                P += stepSizes[stepIndex];
+            }
+
+            if (gamepad1.dpad_down) {
+                P -= stepSizes[stepIndex];
+            }
+
+            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(430.0, 0, 0, 12.663387);
+            launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+
+
+            double curVelocity = launcher.getVelocity();
+            double error = curTargetVelocity - curVelocity;
+
+            telemetry.addData("Target Velocity PIDF", curTargetVelocity);
+            telemetry.addData("Current Velocity PIDF", curVelocity);
+            telemetry.addData("Error PIDF", error);
+            telemetry.addLine("-------------");
+            telemetry.addData("Tuning P PIDF", P);
+            telemetry.addData("Tuning F PIDF", F);
+            telemetry.addData("Step Size PIDF", stepSizes[stepIndex]);
+            telemetry.addLine("--------------");
+
+
             if (isValid) {
+                Pose3D botpose = llResult.getBotpose_MT2();
+                distance = getDistanceFromTag(llResult.getTy());
+                for (LLResultTypes.FiducialResult fid : llResult.getFiducialResults()) {
+                    motiffID = fid.getFiducialId();
+                }
+                telemetry.addData("Distance", distance);
+                telemetry.addData("LL Timestamp", llResult.getTimestamp());
                 telemetry.addLine("AprilTag Detected");
             } else {
                 telemetry.addLine("No AprilTag Detected");
             }
-            Pose3D botPose = llResult.getBotpose_MT2();
-            double tx = llResult.getTx();
-            double ty = llResult.getTy();
-            double ta = llResult.getTa();
-            double distanceInches;
-            int motiffID = 21;
-            String motiff;
-            for (LLResultTypes.FiducialResult fid : llResult.getFiducialResults()) {
-                motiffID = fid.getFiducialId();
-            }
 
-            switch (motiffID) {
-                case 21:
-                    motiff = "GREEN PURPLE PURPLE";
-                    break;
-                case 22:
-                    motiff = "PURPLE GREEN PURPLE";
-                    break;
-                case 23:
-                    motiff = "PURPLE PURPLE GREEN";
-                    break;
-                default:
-                    motiff = "UNKNOWN";
-            }
-
-            telemetry.addData("Motiff Pattern: ", motiff);
-
-            double cameraHeight = 0.30;     // meters
-            double cameraAngle = 20.0;      // degrees upward
-            double tagHeight = 0.45;        // meters (center of tag)
-
-            double angleToTag = Math.toRadians(cameraAngle + ty);
-
-            double distanceMeters = (tagHeight - cameraHeight) / Math.tan(angleToTag);
-            distanceInches = distanceMeters * 39.37;
-
-            telemetry.addData("Distance (in)", distanceInches);
-            telemetry.addData("Horizantal Offset: ", tx);
-            telemetry.addData("Verticle Offset:  (in)", ty);
-            telemetry.addData("Area of tag: ", distanceInches);
 
             // Press a to turn on auto-aim (limelight)
-            if (gamepad1.right_trigger > 0.0 && isValid) {
+            if (gamepad1.right_trigger > 0.0 && isValid && (motiffID == 20 || motiffID == 24)) {
+                double tx = llResult.getTx();
                 // 'amt' of turn
-                double offsetCAngle = Math.toDegrees(Math.atan(0.126975 / distanceMeters));
-
                 double kP = 0.02;
-                double turnPower = kP * (tx+3.0);
+                double turnPower = kP * (tx+3);
                 turnPower = Math.max(-0.3, Math.min(0.3, turnPower));
                 if (Math.abs(tx) < 1.0) turnPower = 0;
+
 
                 // Rotate robot via above
                 fL_Motor += -turnPower;
                 bL_Motor += -turnPower;
                 fR_Motor += turnPower;
                 bR_Motor += turnPower;
+
+
+
 
                 // Telemetry for data
                 telemetry.addData("Left/Right offset: ", tx);
@@ -316,26 +385,41 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             frontRight.setPower(fR_Motor);
             backRight.setPower(bR_Motor);
 
-            if (gamepad2.b || gamepad2.circle) {
+
+            if (gamepad2.b) {
                 if (distanceToGoalMm(true) / 25.4 < 80.0) {
                     launcher_velocity = Math.ceil(25.333 * distanceToGoalMm(alliance)/25.4);
                 } else {
                     launcher_velocity = Math.ceil(22.555 * distanceToGoalMm(alliance)/25.4);
                 }
+
+
+
+
             }
+
 
             // Intake motor's control
-            if (gamepad2.right_stick_y != 0.0) {
+            if (gamepad2.right_stick_y > 0.0) {
                 intakeMotor.setPower(gamepad2.right_stick_y);
+                leftFeeder.setPower(-1.0);
+                rightFeeder.setPower(1.0);
+            } else if (gamepad2.right_stick_y < 0.0) {
+                intakeMotor.setPower(gamepad2.right_stick_y);
+                leftFeeder.setPower(1.0);
+                rightFeeder.setPower(-1.0);
             } else {
                 intakeMotor.setPower(0.0);
+                leftFeeder.setPower(0.0);
+                rightFeeder.setPower(0.0);
             }
 
-            if (gamepad2.right_bumper) {
+
+            /*if (gamepad2.right_bumper) {
                 leftFeeder.setPower(-1.0);
                 rightFeeder.setPower(1.0);
                 topWheel.setPower(-1.0);
-            } else if (gamepad2.x || gamepad2.cross) {
+            } else if (gamepad2.x) {
                 leftFeeder.setPower(1.0);
                 rightFeeder.setPower(-1.0);
                 topWheel.setPower(1.0);
@@ -344,16 +428,29 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 rightFeeder.setPower(0.0);
                 topWheel.setPower(0.0);
             }
-            if (gamepad2.y || gamepad2.triangle && !boxServoUp) {
+            if (gamepad2.y && !boxServoUp) {
                 boxServo.setPosition(0.6);
                 boxServoUp = true;
                 boxServoTimer.reset();
-            }
+            }*/
             // Timer
             if (boxServoUp && boxServoTimer.seconds() > 0.75) {
                 boxServo.setPosition(0.85);
                 boxServoUp = false;
             }
+
+            if (gamepad2.right_bumper) {
+                boxMotor.setPower(1.0);
+                telemetry.addData("Should be running", boxMotor.getPowerFloat());
+                topWheel.setPower(-1.0);
+            } else if (gamepad2.x) {
+                boxMotor.setPower(-1.0);
+                topWheel.setPower(1.0);
+            } else {
+                boxMotor.setPower(0.0);
+                topWheel.setPower(0.0);
+            }
+
 
             // Detected color through sensor
             String detectedColor = "UNKNOWN";
@@ -365,7 +462,9 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 detectedColor = "PURPLE";
             }
 
+
             telemetry.addData("Detected Color:", detectedColor);
+
 
             // Displaying color
             if (detectedColor.equals("GREEN")) {
@@ -376,11 +475,12 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 rgbLight.setPosition(1.0);
             }
 
+
             //Incremental velocity power
             if (gamepad2.left_stick_y > 0.0) {
-                launcher_velocity += 20;
+                launcher_velocity += 100;
             } else if (gamepad2.left_stick_y < 0.0) {
-                launcher_velocity -= 20;
+                launcher_velocity -= 100;
             }
 
 
@@ -415,9 +515,31 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         }
     }
 
+    private double getDistanceFromTag(double ty) {
+        double cameraHeight = 33.7;  // 33.7 in → m
+        double tagHeight    = 76;  // 76.0 in → m
+        double cameraAngle  = Math.toRadians(3.35); // radians
+
+        double angleToTag = cameraAngle + Math.toRadians(ty);
+        return (tagHeight - cameraHeight) / Math.tan(angleToTag); // meters
+    }
+
+    private double calculateRPM(double distance) {
+        double h = 0.86;
+        double angle = 45;
+        double d = distance/100;
+        double V_exit = Math.sqrt((9.8 * Math.pow(d, 2))/(2 * Math.pow(Math.cos(angle), 2)*(d * Math.tan(angle) - h)));
+        double final_velocity = 0.0;
+        double radius = 0.048;
+        if (d < 250) {
+            final_velocity =  (60 / (2 * Math.PI * radius)) * (V_exit / 0.799);
+        } else if (d > 250) {
+            final_velocity =  (60 / (2 * Math.PI * radius)) * (V_exit / 0.78);
+        }
+        return  final_velocity;
+    }
 
     public void launch() { // changed from private
-
 
         launcher.setVelocity(launcher_velocity);
     }
@@ -428,17 +550,16 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 double goalY = 69.15 * 25.4;
                 double dx = goalX - pos.getX(DistanceUnit.MM);
                 double dy = goalY - pos.getY(DistanceUnit.MM);
-                return Math.hypot(dx, dy); // mm distance
+                return Math.hypot(dx, dy); // mm
             } else {
                 double goalX = -73.25 * 25.4;
                 double goalY = -69.15 * 25.4;
                 double dx = goalX - pos.getX(DistanceUnit.MM);
                 double dy = goalY - pos.getY(DistanceUnit.MM);
-                return Math.hypot(dx, dy); // distance
+                return Math.hypot(dx, dy); // mm
             }
         } else {
             return 0;
         }
     }
 }
-

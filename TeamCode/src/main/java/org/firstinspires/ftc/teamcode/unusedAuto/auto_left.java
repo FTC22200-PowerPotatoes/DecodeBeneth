@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.unusedAuto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,10 +8,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Autonomous(name = "Auto_left")
 public class auto_left extends LinearOpMode {
 
-    private DcMotor frontLeft = null;
-    private DcMotor frontRight = null;
-    private DcMotor backLeft = null;
-    private DcMotor backRight = null;
+    private DcMotor leftFront = null;
+    private DcMotor rightFront = null;
+    private DcMotor leftBack = null;
+    private DcMotor rightBack = null;
     private DcMotor linearMotor = null;
     private DcMotor intakeMotor = null;
     private Servo boxServo = null;
@@ -21,10 +21,10 @@ public class auto_left extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Initialize the motors
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        backRight = hardwareMap.get(DcMotor.class, "backRight");
+        leftFront = hardwareMap.get(DcMotor.class, "frontLeft");
+        leftBack = hardwareMap.get(DcMotor.class, "backLeft");
+        rightFront = hardwareMap.get(DcMotor.class, "frontRight");
+        rightBack = hardwareMap.get(DcMotor.class, "backRight");
         linearMotor = hardwareMap.get(DcMotor.class, "linearMotor");
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         boxServo = hardwareMap.get(Servo.class, "boxServo");
@@ -35,10 +35,10 @@ public class auto_left extends LinearOpMode {
         linearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set motor directions
-        frontLeft.setDirection(DcMotor.Direction.FORWARD);
-        backLeft.setDirection(DcMotor.Direction.FORWARD);
-        frontRight.setDirection(DcMotor.Direction.REVERSE);
-        backRight.setDirection(DcMotor.Direction.REVERSE);
+        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        leftBack.setDirection(DcMotor.Direction.FORWARD);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        rightBack.setDirection(DcMotor.Direction.REVERSE);
         linearMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
 
@@ -88,9 +88,9 @@ public class auto_left extends LinearOpMode {
 
     // Helper method to set motor power
     private void setMotorPower(double fl, double fr, double bl, double br) {
-        frontLeft.setPower(fl);
-        frontRight.setPower(fr);
-        backLeft.setPower(bl);
-        backRight.setPower(br);
+        leftFront.setPower(fl);
+        rightFront.setPower(fr);
+        leftBack.setPower(bl);
+        rightBack.setPower(br);
     }
 }
