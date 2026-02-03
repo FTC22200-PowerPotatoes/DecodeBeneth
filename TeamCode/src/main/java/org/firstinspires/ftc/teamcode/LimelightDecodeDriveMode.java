@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -42,17 +43,14 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
     double oldTime = 0;
     boolean alliance = true;
     boolean boxServoUp = false;
-
+    int motiffID = 20;
 
     private AnalogInput laserAnalog;
     public double highVelocity = 1500.0;
     public double lowVelocity = 900.0;
     double curTargetVelocity = highVelocity;
-
-    // Tuned for heavy 152g rim-mounted flywheel
-    double F = 14.8;
-    double P = 120.0;
-
+    double F = 0.0;
+    double P = 0.0;
     double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001};
     int stepIndex = 1;
     private double distance;
@@ -107,10 +105,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         launcher.setDirection(DcMotorEx.Direction.FORWARD);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        // Apply initial tuned PIDF for heavy flywheel
-        PIDFCoefficients initialPidf = new PIDFCoefficients(P, 0.0, 0.0, F);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, initialPidf);
 
 
         // Limelight initalization HERE!
@@ -242,11 +236,11 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
 
             if (gamepad2.dpad_up) { // high
                 double calculatedRPM = calculateRPM(distance);
-                launcher_velocity = calculatedRPM; // distance-based RPM
+                launcher_velocity = calculatedRPM; // AIDEN sucks bad >:((
             } else if (gamepad2.dpad_left) { // medium
                 launcher_velocity = 1650.0;
             } else if (gamepad2.dpad_right) { // low-mid (new)
-                launcher_velocity = 1400.0;
+                launcher_velocity = 1375.0;
             } else if (gamepad2.dpad_down) { // low
                 launcher_velocity = 1200.0;
             }
@@ -331,8 +325,7 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 P -= stepSizes[stepIndex];
             }
 
-            // Use tuned P and F (live-tunable)
-            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(430.0, 0, 0, 12.663387);
             launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
 
@@ -352,6 +345,9 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             if (isValid) {
                 Pose3D botpose = llResult.getBotpose_MT2();
                 distance = getDistanceFromTag(llResult.getTy());
+                for (LLResultTypes.FiducialResult fid : llResult.getFiducialResults()) {
+                    motiffID = fid.getFiducialId();
+                }
                 telemetry.addData("Distance", distance);
                 telemetry.addData("LL Timestamp", llResult.getTimestamp());
                 telemetry.addLine("AprilTag Detected");
@@ -361,7 +357,7 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
 
 
             // Press a to turn on auto-aim (limelight)
-            if (gamepad1.right_trigger > 0.0 && isValid) {
+            if (gamepad1.right_trigger > 0.0 && isValid && (motiffID == 20 || motiffID == 24)) {
                 double tx = llResult.getTx();
                 // 'amt' of turn
                 double kP = 0.02;
@@ -476,13 +472,6 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             }
 
 
-            if (gamepad2.left_bumper) {
-                launcher.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            } else {
-                launcher.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-            }
-
-
             //Incremental velocity power
             if (gamepad2.left_stick_y > 0.0) {
                 launcher_velocity += 100;
@@ -525,7 +514,7 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
     private double getDistanceFromTag(double ty) {
         double cameraHeight = 33.7;  // 33.7 in → m
         double tagHeight    = 76;  // 76.0 in → m
-        double cameraAngle  = Math.toRadians(3.1); // radians
+        double cameraAngle  = Math.toRadians(3.35); // radians
 
         double angleToTag = cameraAngle + Math.toRadians(ty);
         return (tagHeight - cameraHeight) / Math.tan(angleToTag); // meters
@@ -536,34 +525,20 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
         double angle = 45;
         double d = distance/100;
         double V_exit = Math.sqrt((9.8 * Math.pow(d, 2))/(2 * Math.pow(Math.cos(angle), 2)*(d * Math.tan(angle) - h)));
-
+        double final_velocity = 0.0;
         double radius = 0.048;
-        return (60/(2*Math.PI*radius)) * (V_exit/0.5);
-    }
-
-    // Smooth ramp for heavy flywheel so it actually hits target RPM cleanly
-    public void setLauncherVelocitySmooth(double target) {
-        double current = launcher.getVelocity();
-        double maxStep = 300;  // RPM per loop
-
-        double next;
-        if (target > current) {
-            next = Math.min(current + maxStep, target);
-        } else {
-            next = Math.max(current - maxStep, target);
+        if (d < 250) {
+            final_velocity =  (60 / (2 * Math.PI * radius)) * (V_exit / 0.799);
+        } else if (d > 250) {
+            final_velocity =  (60 / (2 * Math.PI * radius)) * (V_exit / 0.78);
         }
-
-        launcher.setVelocity(next);
+        return  final_velocity;
     }
 
     public void launch() { // changed from private
-        // Apply current tuned PIDF and ramp to requested launcher_velocity
-        PIDFCoefficients pidf = new PIDFCoefficients(P, 0.0, 0.0, F);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
 
-        setLauncherVelocitySmooth(launcher_velocity);
+        launcher.setVelocity(launcher_velocity);
     }
-
     public double distanceToGoalMm(boolean isRed) {
         if (pos != null) {
             if (isRed) {
