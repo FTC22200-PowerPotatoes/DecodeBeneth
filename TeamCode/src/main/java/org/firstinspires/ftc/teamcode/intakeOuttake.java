@@ -38,7 +38,7 @@ import org.firstinspires.ftc.teamcode.roadRunner.MecanumDrive;
 import java.util.Locale;
 
 public class intakeOuttake {
-    double launcher_velocity = 1200.0;
+    double launcher_Velocity1 = 1200.0;
     public DcMotor intakeMotor;
     public DcMotorEx launcher;
     public final DcMotorEx leftFront, leftBack, rightBack, rightFront;
@@ -133,39 +133,54 @@ public class intakeOuttake {
 
     public class turnToTag implements Action {
         boolean turn;
-        public turnToTag(boolean turn) {
+        boolean blue;
+        public turnToTag(boolean turn, boolean blue) {
             this.turn = turn;
+            this.blue = blue;
         }
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-            limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
-            LLResult llResult = limelight.getLatestResult();
-            boolean isValid = llResult != null && llResult.isValid();
-            double motiffID = 0;
-            assert llResult != null;
-            for(LLResultTypes.FiducialResult fid :llResult.getFiducialResults()) {
-                motiffID = fid.getFiducialId();
-            } if (turn && isValid && (motiffID == 20 || motiffID == 24)) {
-                double tx = llResult.getTx();
-                // 'amt' of turn
-                double kP = 0.02;
-                double turnPower = kP * (tx + 3);
-                turnPower = Math.max(-0.3, Math.min(0.3, turnPower));
-                if (Math.abs(tx) < 1.0) turnPower = 0;
+            while (turn) {
+                YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+                limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
+                LLResult llResult = limelight.getLatestResult();
+                boolean isValid = llResult != null && llResult.isValid();
+                double motiffID = 0;
+                assert llResult != null;
+                for(LLResultTypes.FiducialResult fid :llResult.getFiducialResults()) {
+                    motiffID = fid.getFiducialId();
+                } if (turn && isValid && ((motiffID == 20 && blue) || (motiffID == 24 && !blue))) {
+                        double tx = llResult.getTx();
+                        // 'amt' of turn
+                        double kP = 0.02;
+                        double turnPower = kP * (tx);
+                        turnPower = Math.max(-0.3, Math.min(0.3, turnPower));
+                        if (Math.abs(tx+3) < 1.0)  turn = false; // may neeed to be 2.5 < math.abs(tx) < 3.5 //Example for offset of 3 with 0.5 margins
 
 
-                // Rotate robot via above
-                leftFront.setPower(-turnPower);
-                leftBack.setPower(-turnPower);
-                rightFront.setPower(turnPower);
-                rightBack.setPower(turnPower);
+                        // Rotate robot via above
+                        leftFront.setPower(-turnPower);
+                        leftBack.setPower(-turnPower);
+                        rightFront.setPower(turnPower);
+                        rightBack.setPower(turnPower);
 
 
-                // Telemetry for data
-                telemetry.addData("Left/Right offset: ", tx);
-                telemetry.addData("Turn Power: ", turnPower);
-                return false;
+                        // Telemetry for data
+                } else {
+                    if (blue) {
+                        leftFront.setPower(1.0);
+                        leftBack.setPower(1.0);
+                        rightFront.setPower(-1.0);
+                        rightBack.setPower(-1.0);
+                    } else {
+                        leftFront.setPower(-1.0);
+                        leftBack.setPower(-1.0);
+                        rightFront.setPower(1.0);
+                        rightBack.setPower(1.0);
+                    }
+                }
+
+
             }
 
             return false;
@@ -189,21 +204,18 @@ public class intakeOuttake {
     }
 
     public class revLauncher implements Action {
-        double launcherVelocity;
+        double launcher_Velocity1;
 
-        public revLauncher(double launcherVelocity) {
-            this.launcherVelocity = launcherVelocity;
+        public revLauncher(double launcher_Velocity1) {
+            this.launcher_Velocity1 = launcher_Velocity1;
         }
-
-
-
         @Override
 
         public boolean run(@NonNull TelemetryPacket packet) {
             PIDFCoefficients pidf = new PIDFCoefficients(P, 0.0, 0.0, F);
             launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
             launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            launcher.setPower(launcherVelocity);
+            launcher.setVelocity(launcher_Velocity1);
 
 
             return false;
@@ -215,14 +227,14 @@ public class intakeOuttake {
     public Action stopBalls() {
         return new stopBalls();
     }
-    public Action revLauncher(double launcherVelocity) {
-        return new revLauncher(launcherVelocity);
+    public Action revLauncher(double launcher_Velocity1) {
+        return new revLauncher(launcher_Velocity1);
     }
     public Action shootBalls() {
         return new shootBalls();
     }
-    public Action turnToTag(boolean turn) {
-        return new turnToTag(turn);
+    public Action turnToTag(boolean turn, boolean blue) {
+        return new turnToTag(turn, blue);
     }
 
 }

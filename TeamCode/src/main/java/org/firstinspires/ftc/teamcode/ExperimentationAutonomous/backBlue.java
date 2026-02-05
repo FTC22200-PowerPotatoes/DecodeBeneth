@@ -53,12 +53,6 @@ public class backBlue extends LinearOpMode {
         boolean isValid = llResult != null && llResult.isValid();
 
 
-        if (isValid) {
-            distance = getDistanceFromTag(llResult.getTy());
-        } else {
-            distance = 280.0;
-        }
-
 
         /* AUTO AIM
         if (gamepad1.right_trigger > 0.0 && isValid) {
@@ -77,81 +71,61 @@ public class backBlue extends LinearOpMode {
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        // shoot first balls
+                    .afterTime(0, take.revLauncher(1650))
+                    .afterTime(2.8, take.turnToTag(false, true))
+                    .afterTime(0.4, take.turnToTag(true, true))
+                    .afterTime(1.25, take.shootBalls())
+                    .strafeToLinearHeading(new Vector2d(63.4, -18), Math.toRadians(-156))
+                    .waitSeconds(2.2)
+                    .afterTime(0.2, take.stopBalls())
+                    // go to first balls and intake and shoot
+                    .splineToLinearHeading(new Pose2d(36.5, -20, Math.toRadians(-270)), Math.toRadians(-90.0))
+                    .afterTime(0, take.intakeBalls())
+                    .afterTime(0.2, take.revLauncher(1600))
+                    .strafeTo(new Vector2d(36.5, -40))
+                    .afterTime(0.2, take.stopBalls())
+                    .afterTime(0.2, take.revLauncher(1600))
+                        .afterTime(0.8, take.turnToTag(false, true))
+                    .afterTime(2.8, take.turnToTag(true, true))
+                    .afterTime(2.0, take.shootBalls())
+                    .strafeToLinearHeading(new Vector2d(63.4, -16), Math.toRadians(-156.0))
+                    .waitSeconds(1.8)
+                    .afterTime(0.1, take.stopBalls())
 
-                        .afterTime(0, take.revLauncher(1650.0))
-                        .strafeToSplineHeading(new Vector2d(63.4, -18), Math.toRadians(-158))
-                        .afterTime(0, take.turnToTag(true))
-                        .afterTime(0.2, take.shootBalls())
-                        .waitSeconds(1.6)
-                        .afterTime(0, take.turnToTag(false))
-                        .afterTime(0, take.stopBalls())
-                        // go to first balls and intake and shoot
-                        .splineToLinearHeading(new Pose2d(39, -28, Math.toRadians(-270)), Math.toRadians(-90.0))
-                        .afterTime(0, take.intakeBalls())
-                        .lineToY(-48)
-                        .afterTime(0.2, take.stopBalls())
-                        .afterTime(0.5, take.revLauncher(1650.0))
-                        .strafeToSplineHeading(new Vector2d(63.4, -16), Math.toRadians(-160.0))
-                        .afterTime(0, take.turnToTag(true))
-                        .afterTime(0.2, take.shootBalls())
-                        .waitSeconds(1.6)
-                        .afterTime(0, take.turnToTag(false))
-                        .afterTime(0, take.stopBalls())
+                    // go to second balls and intake and shoot
+                    .splineToLinearHeading(new Pose2d(20.5, -18, Math.toRadians(-270)), Math.toRadians(-90.0))
+                    .afterTime(0, take.intakeBalls())
+                    .afterTime(0.2, take.revLauncher(1600))
+                    .strafeTo(new Vector2d(20.5, -40))
+                    .afterTime(0.3, take.stopBalls())
+                    .afterTime(0.3, take.revLauncher(1600))
+                    .afterTime(4.6, take.turnToTag(false, true))
+                    .afterTime(2.2, take.turnToTag(true, true))
+                    .afterTime(2.4, take.shootBalls())
+                    .strafeToSplineHeading(new Vector2d(63.4, -16), Math.toRadians(-156.0))
+                    .waitSeconds(1.8)
+                    .afterTime(.1, take.stopBalls())
+                    // go to third balls and intake and shoot
+                    .splineToLinearHeading(new Pose2d(5.0, -17, Math.toRadians(-270)), Math.toRadians(-45.0))
+                    .afterTime(0, take.intakeBalls())
+                    .afterTime(0.2, take.revLauncher(1600))
+                    .waitSeconds(0.01)
+                    .strafeTo(new Vector2d(5.0, -40))
+                    .afterTime(0.2, take.stopBalls())
+                    .afterTime(0.2, take.revLauncher(1600))
+                        .afterTime(3.0, take.turnToTag(false, true))
+                    .afterTime(2.6, take.turnToTag(true, true))
+                    .afterTime(2.8, take.shootBalls())
+                    .strafeToSplineHeading(new Vector2d(63.4, -16), Math.toRadians(-156.0))
+                    .waitSeconds(1.6)
 
-                        // go to second balls and intake and shoot
-                        .splineToLinearHeading(new Pose2d(17, -28, Math.toRadians(-270)), Math.toRadians(-90.0))
-                        .afterTime(0, take.intakeBalls())
-                        .lineToY(-48)
-                        .afterTime(0.3, take.stopBalls())
-                        .afterTime(0.5, take.revLauncher(1650.0))
-                        .strafeToSplineHeading(new Vector2d(63.4, -16), Math.toRadians(-160.0))
-                        .afterTime(0, take.turnToTag(true))
-                        .afterTime(0.2, take.shootBalls())
-                        .afterTime(0, take.turnToTag(false))
-                        .waitSeconds(1.6)
-                        .afterTime(0, take.stopBalls())
-                        // go to third balls and intake and shoot
-                        .splineToLinearHeading(new Pose2d(-7, -28, Math.toRadians(-270)), Math.toRadians(-90.0))
-                        .afterTime(0, take.intakeBalls())
-                        .lineToY(-46)
-                        .afterTime(0.3, take.stopBalls())
-                        .afterTime(0.5, take.revLauncher(1650.0))
-                        .strafeToSplineHeading(new Vector2d(63.4, -16), Math.toRadians(-160.0))
-                        .afterTime(0, take.turnToTag(true))
-                        .afterTime(0.2, take.shootBalls())
-                        .waitSeconds(1.6)
-                        .afterTime(0, take.turnToTag(false))
-
-                        .afterTime(0, take.stopBalls())
-                        .lineToX(48)
-                        .build()
+                    .afterTime(0, take.stopBalls())
+                    .lineToX(48)
+                    .build()
         );
 
 
 
-    }
-    private double calculateRPM(double distance) {
-        double h = 0.86;
-        double angle = 45;
-        double d = distance/100;
-        double V_exit = Math.sqrt((9.8 * Math.pow(d, 2))/(2 * Math.pow(Math.cos(angle), 2)*(d * Math.tan(angle) - h)));
-        double final_velocity = 0.0;
-        double radius = 0.048;
-        if (d < 250) {
-            final_velocity =  (60 / (2 * Math.PI * radius)) * (V_exit / 0.599);
-        } else if (d > 250) {
-            final_velocity =  (60 / (2 * Math.PI * radius)) * (V_exit / 0.58);
-        }
-        return  final_velocity;
-    }
-    private double getDistanceFromTag(double ty) {
-        double cameraHeight = 33.7;
-        double tagHeight = 76;
-        double cameraAngle = Math.toRadians(3.1);
-
-        double angleToTag = cameraAngle + Math.toRadians(ty);
-        return (tagHeight - cameraHeight) / Math.tan(angleToTag); // meters
     }
 
 

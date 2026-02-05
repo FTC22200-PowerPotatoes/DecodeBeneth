@@ -49,8 +49,8 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
     public double highVelocity = 1500.0;
     public double lowVelocity = 900.0;
     double curTargetVelocity = highVelocity;
-    double F = 0.0;
-    double P = 0.0;
+    double F = 14.8;
+    double P = 430.0;
     double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001};
     int stepIndex = 1;
     private double distance;
@@ -325,7 +325,7 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
                 P -= stepSizes[stepIndex];
             }
 
-            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(430.0, 0, 0, 12.663387);
+            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
             launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
 
@@ -333,6 +333,7 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             double error = curTargetVelocity - curVelocity;
 
             telemetry.addData("Target Velocity PIDF", curTargetVelocity);
+            telemetry.addData("Actual velocity: ", launcher.getVelocity());
             telemetry.addData("Current Velocity PIDF", curVelocity);
             telemetry.addData("Error PIDF", error);
             telemetry.addLine("-------------");

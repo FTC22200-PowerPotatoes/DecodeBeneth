@@ -23,7 +23,7 @@ public class frontBlue extends LinearOpMode {
     @Override
 
     public void runOpMode() throws InterruptedException {
-        Pose2d beginPose = new Pose2d(new Vector2d(-48, -48), Math.toRadians(-130));
+        Pose2d beginPose = new Pose2d(new Vector2d(-49.5, -49.5), Math.toRadians(-125));
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
 
@@ -77,46 +77,59 @@ public class frontBlue extends LinearOpMode {
 
         Actions.runBlocking(
                 drive.actionBuilder(beginPose)
-                        .afterTime(0.0, take.revLauncher(1375.0))
+                // Preload balls
+                .afterTime(0, take.revLauncher(1300))
+                .strafeToSplineHeading(new Vector2d(-24.5, -24.5), Math.toRadians(-125))
+                .afterTime(0, take.turnToTag(true, true))
+                .afterTime(0, take.shootBalls())
+                .waitSeconds(1.8)
+                .afterTime(0, take.turnToTag(false, true))
+                .afterTime(0, take.stopBalls())
+                // First balls
+                .turnTo(Math.toRadians(-270.0))
+                .strafeToConstantHeading(new Vector2d(-42.0, -26.5))
+                .afterTime(0, take.intakeBalls())
+                .afterTime(0.4, take.revLauncher(1340))
                         .waitSeconds(0.3)
-                        .strafeTo(new Vector2d(-12, -10))
-                        .afterTime(0, take.shootBalls())
-                        .waitSeconds(1.0)
-                        .afterTime(0, take.stopBalls())
-                        //intake first set of balls and shoot
-                        .strafeToSplineHeading(new Vector2d(-12, -32), Math.toRadians(-270))
-                        .afterTime(0, take.intakeBalls())
-                        .lineToY(-52)
-                        .afterTime(0.2, take.stopBalls())
-                        .afterTime(0.3, take.revLauncher(1375.0))
-                        .strafeToSplineHeading(new Vector2d(-12, -10), Math.toRadians(-130))
-                        .afterTime(0, take.shootBalls())
-                        .waitSeconds(1.0)
-                        .afterTime(0, take.stopBalls())
-
-                        // intake second set of balls and shoot
-                        .splineToLinearHeading(new Pose2d(12, -28, Math.toRadians(-270)), Math.toRadians(-90))
-                        .afterTime(0, take.intakeBalls())
-                        .lineToY(-52)
-                        .afterTime(0.2, take.stopBalls())
-                        .afterTime(0.3, take.revLauncher(1375.0))
-                        .strafeToSplineHeading(new Vector2d(-10.0, -10), Math.toRadians(-130))
-                        .afterTime(0, take.shootBalls())
-                        .waitSeconds(1.0)
-                        .afterTime(0, take.stopBalls())
-
-                        // intake third set of balls and shoot
-                        .splineToLinearHeading(new Pose2d(36, -28, Math.toRadians(-270)), Math.toRadians(-90))
-                        .afterTime(0, take.intakeBalls())
-                        .lineToY(-52)
-                        .afterTime(0.2, take.stopBalls())
-                        .afterTime(0.3, take.revLauncher(1375.0))
-                        .strafeToSplineHeading(new Vector2d(-10.0, -10), Math.toRadians(-130))
-                        .afterTime(0, take.shootBalls())
-                        .waitSeconds(1.0)
-                        .afterTime(0, take.stopBalls())
-                        .strafeTo(new Vector2d(12.0, -10.0))
-                        .build()
+                .strafeTo(new Vector2d(-42.0, -38))
+                .afterTime(0, take.stopBalls())
+                .afterTime(0, take.revLauncher(1340))
+                .strafeToSplineHeading(new Vector2d(-42.0, -24.5), Math.toRadians(-125))
+                .afterTime(0, take.turnToTag(true, true))
+                .afterTime(0, take.shootBalls())
+                .waitSeconds(1.8)
+                .afterTime(0, take.turnToTag(false, true))
+                .afterTime(0, take.stopBalls())
+                // Second balls
+                .strafeToLinearHeading(new Vector2d(-22.5, -26.5), Math.toRadians(-270.0))
+                .afterTime(0, take.intakeBalls())
+                .afterTime(0.4, take.revLauncher(1340))
+                        .waitSeconds(0.3)
+                .strafeTo(new Vector2d(-22.5, -38))
+                .afterTime(0, take.stopBalls())
+                .afterTime(0, take.revLauncher(1340))
+                .strafeToSplineHeading(new Vector2d(-42.0, -24.5), Math.toRadians(-125))
+                .afterTime(0, take.turnToTag(true, true))
+                .afterTime(0, take.shootBalls())
+                .waitSeconds(1.8)
+                .afterTime(0, take.turnToTag(false, true))
+                .afterTime(0, take.stopBalls())
+                // Third balls
+                .strafeToLinearHeading(new Vector2d(-5.5, -26.5), Math.toRadians(-270.0))
+                .afterTime(0, take.intakeBalls())
+                .afterTime(0.4, take.revLauncher(1340))
+                .strafeTo(new Vector2d(-5.5, -38))
+                .afterTime(0, take.stopBalls())
+                .afterTime(0, take.revLauncher(1340))
+                        .waitSeconds(0.3)
+                .strafeToSplineHeading(new Vector2d(-42.0, -24.5), Math.toRadians(-125))
+                .afterTime(0, take.turnToTag(true, true))
+                .afterTime(0, take.shootBalls())
+                .waitSeconds(1.8)
+                .afterTime(0, take.turnToTag(false, true))
+                .afterTime(0, take.stopBalls())
+                .strafeTo(new Vector2d(-5.5, -30))
+                .build()
         );
 
 

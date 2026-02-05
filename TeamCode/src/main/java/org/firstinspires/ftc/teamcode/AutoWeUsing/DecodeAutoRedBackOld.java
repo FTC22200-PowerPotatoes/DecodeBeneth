@@ -24,12 +24,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 public  class DecodeAutoRedBackOld extends OpMode {
     private DcMotorEx launcher;
     // launcher velocities (tune to your hardware)
-    double LAUNCHER_TARGET_VELOCITY = 2100.0;
-    double LAUNCHER_MIN_VELOCITY = 2050.0;
+    double LAUNCHER_TARGET_VELOCITY = 1650.0;
+    double LAUNCHER_MIN_VELOCITY = 1600.0;
     double timesShot = 0;
     double shotsToFire = 3.0;
     double TIME_BETWEEN_SHOTS = 3.0;    // reduced cycle time (tune)
-    double boxServoTime = 0.55;          // servo dwell time (tune)
+    // double boxServoTime = 0.55;          // servo dwell time (tune)
     double robotRotationAngle = -46.5;
     boolean driveOffLine = true;
     boolean limelightOn = true;
@@ -61,13 +61,15 @@ public  class DecodeAutoRedBackOld extends OpMode {
     // Distance to drive BACK into the middle of the field after shooting
     final double RETURN_TO_MIDDLE_DISTANCE_IN = 24.0;    // <-- tune to move into middle of field
 
-    private DcMotorEx leftFront = null;
-    private DcMotorEx leftBack = null;
+    private DcMotorEx frontLeft = null;
+    private DcMotorEx backLeft = null;
     boolean isValid = false;
-    private DcMotorEx rightFront = null;
-    private DcMotorEx rightBack = null;
+    private DcMotorEx frontRight = null;
+    private DcMotorEx backRight = null;
     private DcMotor intakeMotor = null;
-    private Servo boxServo = null;
+
+    // private Servo boxServo = null;
+    private DcMotor boxMotor;
     CRServo leftFeeder;
     CRServo rightFeeder;
     CRServo topWheel;
@@ -116,22 +118,23 @@ public  class DecodeAutoRedBackOld extends OpMode {
 
         // Hardware mapping
         laserAnalog = hardwareMap.get(AnalogInput.class, "laserAnalogInput");
-        leftFront = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        leftBack = hardwareMap.get(DcMotorEx.class, "backLeft");
-        rightFront = hardwareMap.get(DcMotorEx.class, "frontRight");
-        rightBack = hardwareMap.get(DcMotorEx.class, "backRight");
+        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
+        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
+        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         launcher = hardwareMap.get(DcMotorEx.class, "launcherMotor");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
-        boxServo = hardwareMap.get(Servo.class, "boxServo");
+        // boxServo = hardwareMap.get(Servo.class, "boxServo");
+        boxMotor = hardwareMap.get(DcMotor.class, "boxMotor");
         topWheel = hardwareMap.get(CRServo.class, "topWheel");
 
         // Motor directions
-        leftFront.setDirection(DcMotorEx.Direction.FORWARD);
-        leftBack.setDirection(DcMotorEx.Direction.FORWARD);
-        rightFront.setDirection(DcMotorEx.Direction.REVERSE);
-        rightBack.setDirection(DcMotorEx.Direction.REVERSE);
+        frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
+        backLeft.setDirection(DcMotorEx.Direction.FORWARD);
+        frontRight.setDirection(DcMotorEx.Direction.REVERSE);
+        backRight.setDirection(DcMotorEx.Direction.REVERSE);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         launcher.setDirection(DcMotorEx.Direction.FORWARD);
 
@@ -139,23 +142,22 @@ public  class DecodeAutoRedBackOld extends OpMode {
         limelight.pipelineSwitch(8);
 
         // Reset encoders & braking
-        leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-        leftFront.setZeroPowerBehavior(BRAKE);
-        leftBack.setZeroPowerBehavior(BRAKE);
-        rightFront.setZeroPowerBehavior(BRAKE);
-        rightBack.setZeroPowerBehavior(BRAKE);
+        frontLeft.setZeroPowerBehavior(BRAKE);
+        backLeft.setZeroPowerBehavior(BRAKE);
+        frontRight.setZeroPowerBehavior(BRAKE);
+        backRight.setZeroPowerBehavior(BRAKE);
         intakeMotor.setZeroPowerBehavior(BRAKE);
         launcher.setZeroPowerBehavior(BRAKE);
 
         launcher.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         launcher.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
 
-        // initial servo position (closed)
-        boxServo.setPosition(0.85);
+        // boxServo.setPosition(0.85);
         telemetry.addData("Init", "Complete");
         // Limelight initalization HERE!
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -227,7 +229,7 @@ public  class DecodeAutoRedBackOld extends OpMode {
                 if (rotate(ROTATE_SPEED, -robotRotationAngle, AngleUnit.DEGREES, 0.0)) {
                     // prepare launcher sequence
                     if (limelightOn) {
-                        boxServoTimer.reset();
+                        // boxServoTimer.reset();
                         autonomousState = AutonomousState.LIMELIGHT;
                     } else {
                         autonomousState = AutonomousState.LAUNCH;
@@ -237,7 +239,7 @@ public  class DecodeAutoRedBackOld extends OpMode {
                 break;
             case LIMELIGHT:
                 //lumins 2
-                if (rotateToTag(1.0, 1.0) || boxServoTimer.seconds() > 0.2) {
+                if (rotateToTag(1.0, 1.0)) {
                     autonomousState = AutonomousState.LAUNCH;
                     resetDriveFlags();
                 }
@@ -396,15 +398,16 @@ public  class DecodeAutoRedBackOld extends OpMode {
                 break;
             case COMPLETE:
                 // stop all motion
-                leftFront.setPower(0);
-                leftBack.setPower(0);
-                rightFront.setPower(0);
-                rightBack.setPower(0);
+                frontLeft.setPower(0);
+                backLeft.setPower(0);
+                frontRight.setPower(0);
+                backRight.setPower(0);
                 intakeMotor.setPower(0);
                 launcher.setVelocity(0);
                 leftFeeder.setPower(0.0);
                 rightFeeder.setPower(0.0);
                 topWheel.setPower(0.0);
+                boxMotor.setPower(0.0);
                 // nothing else to do
                 break;
         }
@@ -417,14 +420,14 @@ public  class DecodeAutoRedBackOld extends OpMode {
         driveTargetSet = false;
         rotateTargetSet = false;
         strafeTargetSet = false;
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
-        leftFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        leftBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         driveTimer.reset();
     }
 
@@ -445,8 +448,9 @@ public  class DecodeAutoRedBackOld extends OpMode {
                 // Wait for either sufficient velocity OR a short timeout (failsafe)
 
                 if (launcher.getVelocity() > LAUNCHER_MIN_VELOCITY || launcherSpinupTimer.seconds() > 0.4) {
-                    boxServo.setPosition(0.85); // open box to feed
-                    boxServoTimer.reset();
+                    // boxServo.setPosition(0.85); // open box to feed
+                    // boxServoTimer.reset();
+                    boxMotor.setPower(1.0);
                     shotTimer.reset();
                     launchState = LaunchState.PREPARE2;
                 }
@@ -454,7 +458,8 @@ public  class DecodeAutoRedBackOld extends OpMode {
             case PREPARE2:
                 if (shotsToFire < 3) {
                     intakeMotor.setPower(1.0);
-                    boxServo.setPosition(0.85); // open box to feed
+                    //boxServo.setPosition(0.85); // open box to feed
+                    boxMotor.setPower(1.0);
                     leftFeeder.setPower(-1.0);
                     rightFeeder.setPower(1.0);
                     topWheel.setPower(-1.0);
@@ -469,29 +474,24 @@ public  class DecodeAutoRedBackOld extends OpMode {
                     launchState = LaunchState.LAUNCH;
                 }
             case LAUNCH:
-                // push ball up
+                // run box motor and top wheel during launch
+                boxMotor.setPower(1.0);
+                topWheel.setPower(-0.8);
 
+                // push ball up
                 if (timesShot == 2 && shotsToFire < 1) {
-                    boxServo.setPosition(0.6);
+                    // boxServo.setPosition(0.6);
                     if (drive(1.0, 12.0, DistanceUnit.INCH, 0.0)) {
                         launchState = LaunchState.IDLE;
                         autonomousState = AutonomousState.COMPLETE;
                     }
                 } else {
-                    if (boxServoTimer.seconds() > boxServoTime) {
-                        // Open box back up after ts is shot
-                        boxServo.setPosition(0.85);
-                        // wait between shots
-                        if (shotTimer.seconds() > 0.2) {
-                            launchState = LaunchState.IDLE;
-                            return true; // signal shot finished
-                        }
-                    } else {
+                    if (shotTimer.seconds() > 0.2) {
                         intakeMotor.setPower(0.0);
                         leftFeeder.setPower(0.0);
                         rightFeeder.setPower(0.0);
-                        boxServo.setPosition(0.6);
-                        topWheel.setPower(-0.8);
+                        launchState = LaunchState.IDLE;
+                        return true; // signal shot finished
                     }
                 }
                 break;
@@ -507,32 +507,32 @@ public  class DecodeAutoRedBackOld extends OpMode {
 
         if (!driveTargetSet) {
             // reset encoders so target is relative to current pose
-            leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-            leftFront.setTargetPosition((int) targetPosition);
-            leftBack.setTargetPosition((int) targetPosition);
-            rightFront.setTargetPosition((int) targetPosition);
-            rightBack.setTargetPosition((int) targetPosition);
+            frontLeft.setTargetPosition((int) targetPosition);
+            backLeft.setTargetPosition((int) targetPosition);
+            frontRight.setTargetPosition((int) targetPosition);
+            backRight.setTargetPosition((int) targetPosition);
 
-            leftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            leftBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            rightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            rightBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            frontLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            backLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            frontRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            backRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-            leftFront.setPower(Math.abs(speed));
-            leftBack.setPower(Math.abs(speed));
-            rightFront.setPower(Math.abs(speed));
-            rightBack.setPower(Math.abs(speed));
+            frontLeft.setPower(Math.abs(speed));
+            backLeft.setPower(Math.abs(speed));
+            frontRight.setPower(Math.abs(speed));
+            backRight.setPower(Math.abs(speed));
 
             driveTimer.reset();
             driveTargetSet = true;
         }
 
         // If not at target, reset hold timer
-        boolean atTarget = Math.abs(targetPosition - leftFront.getCurrentPosition()) < (TOLERANCE_MM * TICKS_PER_MM);
+        boolean atTarget = Math.abs(targetPosition - frontLeft.getCurrentPosition()) < (TOLERANCE_MM * TICKS_PER_MM);
 
         if (holdSeconds > 0) {
             if (!atTarget) {
@@ -562,20 +562,20 @@ public  class DecodeAutoRedBackOld extends OpMode {
 
         // stop if centered
         if (Math.abs(tx) < toleranceDeg) {
-            leftFront.setPower(0);
-            leftBack.setPower(0);
-            rightFront.setPower(0);
-            rightBack.setPower(0);
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
             telemetry.addData("IGOTNOIDEA ", toleranceDeg);
             telemetry.update();
             return true;
         }
 
         // apply rotation
-        leftFront.setPower(-turn);
-        leftBack.setPower(-turn);
-        rightFront.setPower(turn);
-        rightBack.setPower(turn);
+        frontLeft.setPower(-turn);
+        backLeft.setPower(-turn);
+        frontRight.setPower(turn);
+        backRight.setPower(turn);
 
         telemetry.addData("it' s turning", turn);
         telemetry.update();
@@ -593,38 +593,38 @@ public  class DecodeAutoRedBackOld extends OpMode {
 
         if (!strafeTargetSet) {
             // Reset encoders
-            leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // Strafing uses different wheel directions
-            leftFront.setTargetPosition((int)  targetTicks);
-            leftBack.setTargetPosition((int)  -targetTicks);
-            rightFront.setTargetPosition((int) -targetTicks);
-            rightBack.setTargetPosition((int)  targetTicks);
+            frontLeft.setTargetPosition((int)  targetTicks);
+            backLeft.setTargetPosition((int)  -targetTicks);
+            frontRight.setTargetPosition((int) -targetTicks);
+            backRight.setTargetPosition((int)  targetTicks);
 
             // Run to position
-            leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // Apply power
-            leftFront.setPower(Math.abs(speed));
-            leftBack.setPower(Math.abs(speed));
-            rightFront.setPower(Math.abs(speed));
-            rightBack.setPower(Math.abs(speed));
+            frontLeft.setPower(Math.abs(speed));
+            backLeft.setPower(Math.abs(speed));
+            frontRight.setPower(Math.abs(speed));
+            backRight.setPower(Math.abs(speed));
 
             strafeTimer.reset();
             strafeTargetSet = true;
         }
 
         // Check if all wheels are at target
-        boolean flDone = Math.abs(leftFront.getTargetPosition()  - leftFront.getCurrentPosition())  < (TOLERANCE_MM * TICKS_PER_MM);
-        boolean blDone = Math.abs(leftBack.getTargetPosition()   - leftBack.getCurrentPosition())   < (TOLERANCE_MM * TICKS_PER_MM);
-        boolean frDone = Math.abs(rightFront.getTargetPosition() - rightFront.getCurrentPosition()) < (TOLERANCE_MM * TICKS_PER_MM);
-        boolean brDone = Math.abs(rightBack.getTargetPosition()  - rightBack.getCurrentPosition())  < (TOLERANCE_MM * TICKS_PER_MM);
+        boolean flDone = Math.abs(frontLeft.getTargetPosition()  - frontLeft.getCurrentPosition())  < (TOLERANCE_MM * TICKS_PER_MM);
+        boolean blDone = Math.abs(backLeft.getTargetPosition()   - backLeft.getCurrentPosition())   < (TOLERANCE_MM * TICKS_PER_MM);
+        boolean frDone = Math.abs(frontRight.getTargetPosition() - frontRight.getCurrentPosition()) < (TOLERANCE_MM * TICKS_PER_MM);
+        boolean brDone = Math.abs(backRight.getTargetPosition()  - backRight.getCurrentPosition())  < (TOLERANCE_MM * TICKS_PER_MM);
 
         boolean atTarget = flDone && blDone && frDone && brDone;
 
@@ -645,32 +645,32 @@ public  class DecodeAutoRedBackOld extends OpMode {
         double rightTargetPosition = targetMm * TICKS_PER_MM;
 
         if (!rotateTargetSet) {
-            leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-            rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            backLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            frontRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-            leftFront.setTargetPosition((int) leftTargetPosition);
-            leftBack.setTargetPosition((int) leftTargetPosition);
-            rightFront.setTargetPosition((int) rightTargetPosition);
-            rightBack.setTargetPosition((int) rightTargetPosition);
+            frontLeft.setTargetPosition((int) leftTargetPosition);
+            backLeft.setTargetPosition((int) leftTargetPosition);
+            frontRight.setTargetPosition((int) rightTargetPosition);
+            backRight.setTargetPosition((int) rightTargetPosition);
 
-            leftFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            leftBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            rightFront.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            rightBack.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            frontLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            backLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            frontRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            backRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-            leftFront.setPower(Math.abs(speed));
-            leftBack.setPower(Math.abs(speed));
-            rightFront.setPower(Math.abs(speed));
-            rightBack.setPower(Math.abs(speed));
+            frontLeft.setPower(Math.abs(speed));
+            backLeft.setPower(Math.abs(speed));
+            frontRight.setPower(Math.abs(speed));
+            backRight.setPower(Math.abs(speed));
 
             driveTimer.reset();
             rotateTargetSet = true;
         }
 
-        boolean leftAtTarget  = Math.abs(leftTargetPosition  - leftFront.getCurrentPosition())  < (TOLERANCE_MM * TICKS_PER_MM);
-        boolean rightAtTarget = Math.abs(rightTargetPosition - rightFront.getCurrentPosition()) < (TOLERANCE_MM * TICKS_PER_MM);
+        boolean leftAtTarget  = Math.abs(leftTargetPosition  - frontLeft.getCurrentPosition())  < (TOLERANCE_MM * TICKS_PER_MM);
+        boolean rightAtTarget = Math.abs(rightTargetPosition - frontRight.getCurrentPosition()) < (TOLERANCE_MM * TICKS_PER_MM);
         boolean atTarget = leftAtTarget && rightAtTarget;
 
         // If holdSeconds > 0, require stability
