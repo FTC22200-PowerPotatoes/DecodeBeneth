@@ -24,8 +24,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 public  class DecodeAutoBlueBackOld extends OpMode {
     private DcMotorEx launcher;
     // launcher velocities (tune to your hardware)
-    double LAUNCHER_TARGET_VELOCITY = 2100.0;
-    double LAUNCHER_MIN_VELOCITY = 2050.0;
+    double LAUNCHER_TARGET_VELOCITY = 1650.0;
+    double LAUNCHER_MIN_VELOCITY = 1600.0;
     double timesShot = 0;
     double shotsToFire = 3.0;
     double TIME_BETWEEN_SHOTS = 3.0;    // reduced cycle time (tune)
