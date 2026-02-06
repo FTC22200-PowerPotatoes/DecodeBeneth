@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+//import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import androidx.annotation.NonNull;
 import com.acmerobotics.roadrunner.Action;
@@ -48,6 +49,7 @@ public class intakeOuttake {
     public CRServo topWheel;
     public AnalogInput laserAnalog;
     public Limelight3A limelight;
+    ElapsedTime turningTime = new ElapsedTime();
     public IMU imu;
 
     double F = 14.8;
@@ -83,6 +85,7 @@ public class intakeOuttake {
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         launcher.setDirection(DcMotorEx.Direction.FORWARD);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         PIDFCoefficients initialPidf = new PIDFCoefficients(P, 0.0, 0.0, F);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, initialPidf);
@@ -137,9 +140,12 @@ public class intakeOuttake {
         public turnToTag(boolean turn, boolean blue) {
             this.turn = turn;
             this.blue = blue;
+            turningTime.reset();
         }
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
+
+
             while (turn) {
                 YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
                 limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
@@ -155,7 +161,7 @@ public class intakeOuttake {
                         double kP = 0.02;
                         double turnPower = kP * (tx);
                         turnPower = Math.max(-0.3, Math.min(0.3, turnPower));
-                        if (Math.abs(tx+3) < 1.0)  turn = false; // may neeed to be 2.5 < math.abs(tx) < 3.5 //Example for offset of 3 with 0.5 margins
+                        if (Math.abs(tx) < 2.0)  turn = false; // may need to be 2.5 < math.abs(tx) < 3.5 //Example for offset of 3 with 0.5 margins
 
 
                         // Rotate robot via above
@@ -166,18 +172,18 @@ public class intakeOuttake {
 
 
                         // Telemetry for data
-                } else {
-                    if (blue) {
-                        leftFront.setPower(1.0);
-                        leftBack.setPower(1.0);
-                        rightFront.setPower(-1.0);
-                        rightBack.setPower(-1.0);
-                    } else {
-                        leftFront.setPower(-1.0);
-                        leftBack.setPower(-1.0);
-                        rightFront.setPower(1.0);
-                        rightBack.setPower(1.0);
-                    }
+//                } else {
+//                    if (blue) {
+//                        leftFront.setPower(0.5);
+//                        leftBack.setPower(0.5);
+//                        rightFront.setPower(-0.5);
+//                        rightBack.setPower(-0.5);
+//                    } else {
+//                        leftFront.setPower(-0.5);
+//                        leftBack.setPower(-0.5);
+//                        rightFront.setPower(0.5);
+//                        rightBack.setPower(0.5);
+//                    }
                 }
 
 

@@ -85,11 +85,12 @@ public class backRed extends LinearOpMode {
                         .afterTime(0.7, take.turnToTag(false, false))
                         .waitSeconds(2.2)
                         .afterTime(0.2, take.stopBalls())
+
                         // go to first balls and intake and shoot
                         .splineToLinearHeading(new Pose2d(52.5, 20, Math.toRadians(270)), Math.toRadians(90.0))
                         .afterTime(0, take.intakeBalls())
                         .afterTime(0.2, take.revLauncher(1580))
-                        .strafeTo(new Vector2d(52.5, 40))
+                        .strafeTo(new Vector2d(52.5, 50))
                         .afterTime(0.2, take.stopBalls())
                         .afterTime(0.2, take.revLauncher(1580))
                         .afterTime(1.8, take.turnToTag(true, false))
@@ -100,10 +101,10 @@ public class backRed extends LinearOpMode {
                         .afterTime(0.1, take.stopBalls())
 
                         // go to second balls and intake and shoot
-                        .splineToLinearHeading(new Pose2d(36.5, 18, Math.toRadians(270)), Math.toRadians(90.0))
+                        .splineToLinearHeading(new Pose2d(36.5, 18, Math.toRadians(270)), Math.toRadians(45.0))
                         .afterTime(0, take.intakeBalls())
                         .afterTime(0.2, take.revLauncher(1580))
-                        .strafeTo(new Vector2d(36.5, 40))
+                        .strafeTo(new Vector2d(36.5, 50))
                         .afterTime(0.3, take.stopBalls())
                         .afterTime(0.3, take.revLauncher(1580))
                         .afterTime(2.2, take.turnToTag(true, false))
@@ -112,12 +113,13 @@ public class backRed extends LinearOpMode {
                         .afterTime(0, take.turnToTag(false, false))
                         .waitSeconds(1.8)
                         .afterTime(.1, take.stopBalls())
+
                         // go to third balls and intake and shoot
                         .splineToLinearHeading(new Pose2d(20.5, 17, Math.toRadians(270)), Math.toRadians(45.0))
                         .afterTime(0, take.intakeBalls())
                         .afterTime(0.2, take.revLauncher(1580))
                         .waitSeconds(0.01)
-                        .strafeTo(new Vector2d(20.5, 40))
+                        .strafeTo(new Vector2d(20.5, 50))
                         .afterTime(0.2, take.stopBalls())
                         .afterTime(0.2, take.revLauncher(1580))
                         .afterTime(2.6, take.turnToTag(true, false))

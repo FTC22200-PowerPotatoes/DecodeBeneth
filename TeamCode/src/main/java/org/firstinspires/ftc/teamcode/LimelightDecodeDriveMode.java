@@ -216,6 +216,8 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
             double frequency = 1 / loopTime;
             oldTime = newTime;
 
+
+
             // PIDF Rules
 
 
@@ -358,13 +360,13 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
 
 
             // Press a to turn on auto-aim (limelight)
-            if (gamepad1.right_trigger > 0.0 && isValid && (motiffID == 20 || motiffID == 24)) {
+            if (gamepad1.right_trigger > 0.0 && (motiffID == 20 || motiffID == 24) && isValid) {
                 double tx = llResult.getTx();
                 // 'amt' of turn
                 double kP = 0.02;
-                double turnPower = kP * (tx+3);
+                double turnPower = kP * (tx);
                 turnPower = Math.max(-0.3, Math.min(0.3, turnPower));
-                if (Math.abs(tx) < 1.0) turnPower = 0;
+                if (Math.abs(tx) < 2.0) turnPower = 0;
 
 
                 // Rotate robot via above
