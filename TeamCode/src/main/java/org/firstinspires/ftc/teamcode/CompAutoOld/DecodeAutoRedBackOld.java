@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.AutoWeUsing;
+package org.firstinspires.ftc.teamcode.CompAutoOld;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
@@ -13,24 +13,23 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Autonomous(name="CurrentBLUEBackPlayoff", group="Decode")
-public  class DecodeAutoBlueBackOld extends OpMode {
+@Autonomous(name="CurrentRedBackPlayoff", group="Decode")
+public  class DecodeAutoRedBackOld extends OpMode {
     private DcMotorEx launcher;
     // launcher velocities (tune to your hardware)
-    double LAUNCHER_TARGET_VELOCITY = 2100.0;
-    double LAUNCHER_MIN_VELOCITY = 2050.0;
+    double LAUNCHER_TARGET_VELOCITY = 1650.0;
+    double LAUNCHER_MIN_VELOCITY = 1600.0;
     double timesShot = 0;
     double shotsToFire = 3.0;
     double TIME_BETWEEN_SHOTS = 3.0;    // reduced cycle time (tune)
-    double boxServoTime = 0.55;          // servo dwell time (tune)
-    double robotRotationAngle = 46.5;
+    // double boxServoTime = 0.55;          // servo dwell time (tune)
+    double robotRotationAngle = -46.5;
     boolean driveOffLine = true;
     boolean limelightOn = true;
     private Limelight3A limelight;
@@ -67,8 +66,9 @@ public  class DecodeAutoBlueBackOld extends OpMode {
     private DcMotorEx frontRight = null;
     private DcMotorEx backRight = null;
     private DcMotor intakeMotor = null;
+
+    // private Servo boxServo = null;
     private DcMotor boxMotor;
-    private Servo boxServo = null;
     CRServo leftFeeder;
     CRServo rightFeeder;
     CRServo topWheel;
@@ -125,9 +125,9 @@ public  class DecodeAutoBlueBackOld extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcherMotor");
         leftFeeder = hardwareMap.get(CRServo.class, "leftFeeder");
         rightFeeder = hardwareMap.get(CRServo.class, "rightFeeder");
-        boxServo = hardwareMap.get(Servo.class, "boxServo");
+        // boxServo = hardwareMap.get(Servo.class, "boxServo");
+        boxMotor = hardwareMap.get(DcMotor.class, "boxMotor");
         topWheel = hardwareMap.get(CRServo.class, "topWheel");
-        boxMotor = hardwareMap.get(DcMotorEx.class, "boxMotor");
 
         // Motor directions
         frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
@@ -156,8 +156,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
         launcher.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         launcher.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
 
-        // initial servo position (closed)
-        boxServo.setPosition(0.85);
+        // boxServo.setPosition(0.85);
         telemetry.addData("Init", "Complete");
         // Limelight initalization HERE!
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -229,7 +228,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 if (rotate(ROTATE_SPEED, -robotRotationAngle, AngleUnit.DEGREES, 0.0)) {
                     // prepare launcher sequence
                     if (limelightOn) {
-                        boxServoTimer.reset();
+                        // boxServoTimer.reset();
                         autonomousState = AutonomousState.LIMELIGHT;
                     } else {
                         autonomousState = AutonomousState.LAUNCH;
@@ -239,7 +238,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 break;
             case LIMELIGHT:
                 //lumins 2
-                if (rotateToTag(1.0, 1.0) || boxServoTimer.seconds() > 0.2) {
+                if (rotateToTag(1.0, 1.0)) {
                     autonomousState = AutonomousState.LAUNCH;
                     resetDriveFlags();
                 }
@@ -303,7 +302,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 }
                 break;
             case ROTATETOBALLS:
-                if (rotate(ROTATE_SPEED, 155.0, AngleUnit.DEGREES, 0.0)) {
+                if (rotate(ROTATE_SPEED, -155.0, AngleUnit.DEGREES, 0.0)) {
                     autonomousState = AutonomousState.DRIVETONEXTBALLSX;
                     resetDriveFlags();
                     timesShot = 1;
@@ -330,15 +329,15 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 }
                 break;
             case ROTATESTRAIGHT:
-                if (rotate(ROTATE_SPEED, -155.0, AngleUnit.DEGREES, 0.0)) {
-                    robotRotationAngle += 6.0;
+                if (rotate(ROTATE_SPEED, 155.0, AngleUnit.DEGREES, 0.0)) {
+                    robotRotationAngle -= 6.0;
                     autonomousState = AutonomousState.GOBACKAGAIN;
                     resetDriveFlags();
                 }
                 break;
             case GOBACKAGAIN:
                 if (drive(DRIVE_SPEED, -20.0, DistanceUnit.INCH, 0.0)) {
-                    robotRotationAngle += 2;
+                    robotRotationAngle -= 2;
                     timesShot = 1;
                     autonomousState = AutonomousState.POINT_TO_SHOOT;
                     launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
@@ -346,7 +345,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 }
                 break;
             case STRAFETOSIDE:
-                if (strafe(DRIVE_SPEED, -30.0, DistanceUnit.INCH, 0.0)) {
+                if (strafe(DRIVE_SPEED, 30.0, DistanceUnit.INCH, 0.0)) {
                     autonomousState = AutonomousState.COMPLETE;
                 }
             case DRIVETONEXTBALLSY2:
@@ -356,7 +355,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 }
                 break;
             case ROTATETOBALLS2:
-                if (rotate(ROTATE_SPEED, 155.0, AngleUnit.DEGREES, 0.0)) {
+                if (rotate(ROTATE_SPEED, -155.0, AngleUnit.DEGREES, 0.0)) {
                     autonomousState = AutonomousState.DRIVETONEXTBALLSX2;
                     resetDriveFlags();
                 }
@@ -382,7 +381,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 }
                 break;
             case ROTATESTRAIGHT2:
-                if (rotate(ROTATE_SPEED, -155.0, AngleUnit.DEGREES, 0.0)) {
+                if (rotate(ROTATE_SPEED, 155.0, AngleUnit.DEGREES, 0.0)) {
                     autonomousState = AutonomousState.GOBACKAGAIN2;
                     resetDriveFlags();
                 }
@@ -407,6 +406,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 leftFeeder.setPower(0.0);
                 rightFeeder.setPower(0.0);
                 topWheel.setPower(0.0);
+                boxMotor.setPower(0.0);
                 // nothing else to do
                 break;
         }
@@ -447,8 +447,9 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                 // Wait for either sufficient velocity OR a short timeout (failsafe)
 
                 if (launcher.getVelocity() > LAUNCHER_MIN_VELOCITY || launcherSpinupTimer.seconds() > 0.4) {
-                    boxServo.setPosition(0.85); // open box to feed
-                    boxServoTimer.reset();
+                    // boxServo.setPosition(0.85); // open box to feed
+                    // boxServoTimer.reset();
+                    boxMotor.setPower(1.0);
                     shotTimer.reset();
                     launchState = LaunchState.PREPARE2;
                 }
@@ -456,7 +457,8 @@ public  class DecodeAutoBlueBackOld extends OpMode {
             case PREPARE2:
                 if (shotsToFire < 3) {
                     intakeMotor.setPower(1.0);
-                    boxServo.setPosition(0.85); // open box to feed
+                    //boxServo.setPosition(0.85); // open box to feed
+                    boxMotor.setPower(1.0);
                     leftFeeder.setPower(-1.0);
                     rightFeeder.setPower(1.0);
                     topWheel.setPower(-1.0);
@@ -471,29 +473,24 @@ public  class DecodeAutoBlueBackOld extends OpMode {
                     launchState = LaunchState.LAUNCH;
                 }
             case LAUNCH:
-                // push ball up
+                // run box motor and top wheel during launch
+                boxMotor.setPower(1.0);
+                topWheel.setPower(-0.8);
 
+                // push ball up
                 if (timesShot == 2 && shotsToFire < 1) {
-                    boxServo.setPosition(0.6);
+                    // boxServo.setPosition(0.6);
                     if (drive(1.0, 12.0, DistanceUnit.INCH, 0.0)) {
                         launchState = LaunchState.IDLE;
                         autonomousState = AutonomousState.COMPLETE;
                     }
                 } else {
-                    if (boxServoTimer.seconds() > boxServoTime) {
-                        // Open box back up after ts is shot
-                        boxServo.setPosition(0.85);
-                        // wait between shots
-                        if (shotTimer.seconds() > 0.2) {
-                            launchState = LaunchState.IDLE;
-                            return true; // signal shot finished
-                        }
-                    } else {
+                    if (shotTimer.seconds() > 0.2) {
                         intakeMotor.setPower(0.0);
                         leftFeeder.setPower(0.0);
                         rightFeeder.setPower(0.0);
-                        boxServo.setPosition(0.6);
-                        topWheel.setPower(-0.8);
+                        launchState = LaunchState.IDLE;
+                        return true; // signal shot finished
                     }
                 }
                 break;
@@ -506,6 +503,7 @@ public  class DecodeAutoBlueBackOld extends OpMode {
     boolean drive(double speed, double distance, DistanceUnit distanceUnit, double holdSeconds) {
         final double TOLERANCE_MM = 10;
         double targetPosition = (distanceUnit.toMm(distance) * TICKS_PER_MM);
+
         if (!driveTargetSet) {
             // reset encoders so target is relative to current pose
             frontLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
