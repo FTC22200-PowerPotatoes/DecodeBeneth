@@ -41,7 +41,8 @@ public class frontBlue extends LinearOpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
         );
         imu.initialize(new IMU.Parameters(orientationOnRobot));
-        //MecanumDrive.PARAMS.inPerTick = 0.0035088229616347128;
+
+
         waitForStart();
 
         limelight.start();
