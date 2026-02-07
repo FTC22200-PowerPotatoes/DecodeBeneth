@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import com.acmerobotics.roadrunner.ftc.MidpointTimer;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -40,9 +42,11 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
     GoBildaPinpointDriver odo;
     public Pose2D autoPos;
     Pose2D pos = null;
+    double poss = 0.28;
     double oldTime = 0;
     boolean alliance = true;
     boolean boxServoUp = false;
+    private final ElapsedTime runtimew = new ElapsedTime();
     int motiffID = 20;
 
     private AnalogInput laserAnalog;
@@ -468,15 +472,20 @@ public class LimelightDecodeDriveMode extends LinearOpMode {
 
             telemetry.addData("Detected Color:", detectedColor);
 
-
             // Displaying color
-            if (detectedColor.equals("GREEN")) {
-                rgbLight.setPosition(0.500);
-            } else if (detectedColor.equals("PURPLE")) {
-                rgbLight.setPosition(0.7222);
-            } else {
-                rgbLight.setPosition(1.0);
-            }
+
+
+            telemetry.addData("COLOR NUM: ", poss);
+
+          if (runtimew.seconds() > 0.05) {
+               poss = 0.48 + 0.20 * Math.sin(getRuntime()*2*Math.PI*0.25);
+               poss = Math.max(0.28, Math.min(0.68, poss));
+               rgbLight.setPosition(poss);
+               runtimew.reset();
+           }
+
+
+
 
 
             //Incremental velocity power

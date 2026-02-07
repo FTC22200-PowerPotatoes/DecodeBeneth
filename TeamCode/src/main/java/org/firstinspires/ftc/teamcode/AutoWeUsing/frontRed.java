@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.ExperimentationAutonomous;
+package org.firstinspires.ftc.teamcode.AutoWeUsing;
 
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -89,7 +89,8 @@ public class frontRed extends LinearOpMode {
                 .strafeToLinearHeading(new Vector2d(-24.5, 26.5), Math.toRadians(270.0))
                 .afterTime(0, take.intakeBalls())
                 .afterTime(0.4, take.revLauncher(1300))
-                .strafeTo(new Vector2d(-24.5, 38))
+                .strafeTo(new Vector2d(-24.5, 26.5))
+                .strafeTo(new Vector2d(-24.5, 65))
                 .afterTime(0, take.stopBalls())
                 .afterTime(0, take.revLauncher(1300))
                 .strafeToSplineHeading(new Vector2d(-24.5, 24.5), Math.toRadians(125))
@@ -102,7 +103,8 @@ public class frontRed extends LinearOpMode {
                 .strafeToLinearHeading(new Vector2d(-9.5, 26.5), Math.toRadians(270.0))
                 .afterTime(0, take.intakeBalls())
                 .afterTime(0.4, take.revLauncher(1300))
-                .strafeTo(new Vector2d(-9.5, 38))
+                .strafeTo(new Vector2d(-9.5, 26.5))
+                .strafeTo(new Vector2d(-9.5, 65))
                 .afterTime(0, take.stopBalls())
                 .afterTime(0, take.revLauncher(1300))
                 .strafeToSplineHeading(new Vector2d(-24.5, 24.5), Math.toRadians(125))
@@ -115,7 +117,8 @@ public class frontRed extends LinearOpMode {
                 .strafeToLinearHeading(new Vector2d(5.5, 26.5), Math.toRadians(270.0))
                 .afterTime(0, take.intakeBalls())
                 .afterTime(0.4, take.revLauncher(1300))
-                .strafeTo(new Vector2d(5.5, 38))
+                .strafeTo(new Vector2d(5.5, 26.5))
+                .strafeTo(new Vector2d(5.5, 65))
                 .afterTime(0, take.stopBalls())
                 .afterTime(0, take.revLauncher(1300))
                 .strafeToSplineHeading(new Vector2d(-24.5, 24.5), Math.toRadians(125))
@@ -153,6 +156,5 @@ public class frontRed extends LinearOpMode {
         double angleToTag = cameraAngle + Math.toRadians(ty);
         return (tagHeight - cameraHeight) / Math.tan(angleToTag); // meters
     }
-
 
 }

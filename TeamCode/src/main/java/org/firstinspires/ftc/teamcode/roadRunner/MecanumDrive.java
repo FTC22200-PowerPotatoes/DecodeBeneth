@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.roadRunner;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.linearOpMode;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import androidx.annotation.NonNull;
@@ -42,7 +43,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -119,6 +122,9 @@ public final class MecanumDrive {
     public final VoltageSensor voltageSensor;
     public IMU imu = null;
     Limelight3A limelight = null;
+    private Servo rgbLight;
+    double poss = 0.27;
+    private final ElapsedTime runtimew = new ElapsedTime();
     public final LazyImu lazyImu;
 
     public final Localizer localizer;
@@ -242,6 +248,7 @@ public final class MecanumDrive {
         leftFront = hardwareMap.get(DcMotorEx.class, "frontLeft");
         rightBack = hardwareMap.get(DcMotorEx.class, "backRight");
         rightFront = hardwareMap.get(DcMotorEx.class, "frontRight");
+        rgbLight = hardwareMap.get(Servo.class, "RGB Light");
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -266,7 +273,6 @@ public final class MecanumDrive {
 
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
-
     }
 
 
@@ -377,6 +383,12 @@ public final class MecanumDrive {
             c.setStroke("#4CAF50FF");
             c.setStrokeWidth(1);
             c.strokePolyline(xPoints, yPoints);
+            if (runtimew.seconds() > 0.05) {
+                poss = 0.275 + 0.025 * Math.sin(runtimew.seconds()*2*Math.PI*0.35);
+                poss = Math.max(0.25, Math.min(0.30, poss));
+                rgbLight.setPosition(poss);
+                runtimew.reset();
+            }
 
             return true;
         }

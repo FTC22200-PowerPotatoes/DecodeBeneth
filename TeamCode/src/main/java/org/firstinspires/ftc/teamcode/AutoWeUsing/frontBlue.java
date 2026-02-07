@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.ExperimentationAutonomous;
+package org.firstinspires.ftc.teamcode.AutoWeUsing;
 
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -89,7 +89,8 @@ public class frontBlue extends LinearOpMode {
                 .strafeToConstantHeading(new Vector2d(-42.0, -26.5))
                 .afterTime(0, take.intakeBalls())
                 .afterTime(0.4, take.revLauncher(1340))
-                        .waitSeconds(0.3)
+                .waitSeconds(0.3)
+                .strafeTo(new Vector2d(-42.0, -26.5))
                 .strafeTo(new Vector2d(-42.0, -38))
                 .afterTime(0, take.stopBalls())
                 .afterTime(0, take.revLauncher(1340))
@@ -100,10 +101,12 @@ public class frontBlue extends LinearOpMode {
                 .afterTime(0, take.turnToTag(false, true))
                 .afterTime(0, take.stopBalls())
                 // Second balls
+                        //value MIGHT be too high maybe idk we'll see
                 .strafeToLinearHeading(new Vector2d(-22.5, -26.5), Math.toRadians(-270.0))
                 .afterTime(0, take.intakeBalls())
                 .afterTime(0.4, take.revLauncher(1340))
-                        .waitSeconds(0.3)
+                .waitSeconds(0.3)
+                .strafeTo(new Vector2d(-22.5, -26.5))
                 .strafeTo(new Vector2d(-22.5, -38))
                 .afterTime(0, take.stopBalls())
                 .afterTime(0, take.revLauncher(1340))
@@ -117,6 +120,7 @@ public class frontBlue extends LinearOpMode {
                 .strafeToLinearHeading(new Vector2d(-5.5, -26.5), Math.toRadians(-270.0))
                 .afterTime(0, take.intakeBalls())
                 .afterTime(0.4, take.revLauncher(1340))
+                        .strafeTo(new Vector2d(-5.5, -26.5))
                 .strafeTo(new Vector2d(-5.5, -38))
                 .afterTime(0, take.stopBalls())
                 .afterTime(0, take.revLauncher(1340))

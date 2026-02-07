@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.ExperimentationAutonomous;
+package org.firstinspires.ftc.teamcode.AutoWeUsing;
 
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.roadRunner.MecanumDrive;
 
 // Limelight
 
-@Autonomous(name="RRbackRed", group="Decode")
-public class backRed extends LinearOpMode {
+@Autonomous(name="RRbackRedSupport", group="Decode")
+public class backRedSupport extends LinearOpMode {
     public Limelight3A limelight;
     public IMU imu;
 
@@ -90,7 +90,7 @@ public class backRed extends LinearOpMode {
                         .splineToLinearHeading(new Pose2d(52.5, 20, Math.toRadians(270)), Math.toRadians(90.0))
                         .afterTime(0, take.intakeBalls())
                         .afterTime(0.2, take.revLauncher(1580))
-                        .strafeTo(new Vector2d(52.5, 50))
+                        .strafeTo(new Vector2d(52.5, 65))
                         .afterTime(0.2, take.stopBalls())
                         .afterTime(0.2, take.revLauncher(1580))
                         .afterTime(1.8, take.turnToTag(true, false))
@@ -100,11 +100,11 @@ public class backRed extends LinearOpMode {
                         .afterTime(0, take.turnToTag(false, false))
                         .afterTime(0.1, take.stopBalls())
 
-                        // go to second balls and intake and shoot
+                        /* go to second balls and intake and shoot
                         .splineToLinearHeading(new Pose2d(36.5, 18, Math.toRadians(270)), Math.toRadians(45.0))
                         .afterTime(0, take.intakeBalls())
                         .afterTime(0.2, take.revLauncher(1580))
-                        .strafeTo(new Vector2d(36.5, 50))
+                        .strafeTo(new Vector2d(36.5, 65))
                         .afterTime(0.3, take.stopBalls())
                         .afterTime(0.3, take.revLauncher(1580))
                         .afterTime(2.2, take.turnToTag(true, false))
@@ -113,13 +113,13 @@ public class backRed extends LinearOpMode {
                         .afterTime(0, take.turnToTag(false, false))
                         .waitSeconds(1.8)
                         .afterTime(.1, take.stopBalls())
-
+                        */
                         // go to third balls and intake and shoot
-                        .splineToLinearHeading(new Pose2d(20.5, 17, Math.toRadians(270)), Math.toRadians(45.0))
+                        .splineToLinearHeading(new Pose2d(63.4, 40, Math.toRadians(270)), Math.toRadians(45.0))
                         .afterTime(0, take.intakeBalls())
                         .afterTime(0.2, take.revLauncher(1580))
                         .waitSeconds(0.01)
-                        .strafeTo(new Vector2d(20.5, 50))
+                        .strafeTo(new Vector2d(63.4, 65))
                         .afterTime(0.2, take.stopBalls())
                         .afterTime(0.2, take.revLauncher(1580))
                         .afterTime(2.6, take.turnToTag(true, false))
